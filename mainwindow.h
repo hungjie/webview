@@ -17,13 +17,16 @@ public:
     ~MainWindow();
 
 private slots:
-    void linkClicked(QUrl const& url);
-
     void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
+    void on_actionHighlight_links_triggered(bool checked);
 
 private:
     Ui::MainWindow *ui;
     WebView* v_;
+    QString jQuery;
 };
 
 #endif // MAINWINDOW_H

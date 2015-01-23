@@ -20,3 +20,8 @@ HEADERS  += mainwindow.h \
     mywebpage.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES +=
+
+RESOURCES += \
+    jquery.qrc

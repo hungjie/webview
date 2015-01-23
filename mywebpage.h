@@ -57,12 +57,16 @@ private slots:
     void setStatusBarText(const QString &string);
     void downloadRequested(const QNetworkRequest &request);
     void openLinkInNewTab();
+    void linkClicked(const QUrl &);
+    void loadStarted();
 
 private:
     QString m_statusBarText;
     QUrl m_initialUrl;
     int m_progress;
     WebPage *m_page;
+    QString jQuery;
+
 };
 
 #endif // MYWEBPAGE_H

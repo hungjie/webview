@@ -4,6 +4,8 @@
 #include <QClipboard>
 #include <QNetworkRequest>
 
+#include <QWebFrame>
+
 WebPage::WebPage(QObject *parent)
     : QWebPage(parent)
     , m_keyboardModifiers(Qt::NoModifier)
@@ -35,10 +37,20 @@ WebView::WebView(QWidget* parent)
     , m_page(new WebPage(this))
 {
     setPage(m_page);
+
+    QFile file;
+    file.setFileName(":/jquery.min.js");
+    file.open(QIODevice::ReadOnly);
+    jQuery = file.readAll();
+    jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
+    file.close();
+
     connect(page(), SIGNAL(statusBarMessage(QString)),
             SLOT(setStatusBarText(QString)));
     connect(this, SIGNAL(loadProgress(int)),
             this, SLOT(setProgress(int)));
+    connect(this, SIGNAL(loadStarted()),
+            this, SLOT(loadStarted()));
     connect(this, SIGNAL(loadFinished(bool)),
             this, SLOT(loadFinished()));
     connect(page(), SIGNAL(loadingUrl(QUrl)),
@@ -47,6 +59,8 @@ WebView::WebView(QWidget* parent)
             this, SLOT(downloadRequested(QNetworkRequest)));
     page()->setForwardUnsupportedContent(true);
 
+    page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    connect(this, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
 }
 
 void WebView::contextMenuEvent(QContextMenuEvent *event)
@@ -96,13 +110,19 @@ void WebView::setProgress(int progress)
     m_progress = progress;
 }
 
+void WebView::loadStarted()
+{
+    m_progress = 0;
+}
+
 void WebView::loadFinished()
 {
     if (100 != m_progress) {
         qWarning() << "Received finished signal while progress is still:" << progress()
                    << "Url:" << url();
     }
-    m_progress = 0;
+
+    page()->mainFrame()->evaluateJavaScript(jQuery);
 }
 
 void WebView::loadUrl(const QUrl &url)
@@ -151,4 +171,10 @@ void WebView::setStatusBarText(const QString &string)
 void WebView::downloadRequested(const QNetworkRequest &request)
 {
     //BrowserApplication::downloadManager()->download(request);
+}
+
+void WebView::linkClicked(QUrl const& url)
+{
+    loadUrl(url);
+    //ui->lineEdit->setText(url.toString());
 }
