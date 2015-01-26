@@ -2,7 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "mywebpage.h"
+#include <QMouseEvent>
+#include <QLabel>
+#include "../mywebpage.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,10 +25,19 @@ private slots:
 
     void on_actionHighlight_links_triggered(bool checked);
 
+    void on_actionMove_triggered();
+
+    void on_actionMovetoweb_triggered();
+
+protected:
+    void mouseMoveEvent(QMouseEvent *e);
+
 private:
     Ui::MainWindow *ui;
     WebView* v_;
     QString jQuery;
+
+    QLabel* msgLabel;
 };
 
 #endif // MAINWINDOW_H

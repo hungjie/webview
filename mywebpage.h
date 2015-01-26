@@ -5,6 +5,7 @@
 #include <QWebView>
 #include <QAction>
 #include <QMouseEvent>
+#include <QLabel>
 
 class WebPage : public QWebPage
 {
@@ -45,11 +46,14 @@ public:
     QString lastStatusBarText() const;
     inline int progress() const { return m_progress; }
 
+    void setStatusBarLable(QLabel* label);
+
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
     void wheelEvent(QWheelEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
 
 private slots:
     void setProgress(int progress);
@@ -66,6 +70,7 @@ private:
     int m_progress;
     WebPage *m_page;
     QString jQuery;
+    QLabel* status_label_;
 
 };
 

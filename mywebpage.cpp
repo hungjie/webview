@@ -6,6 +6,8 @@
 
 #include <QWebFrame>
 
+#include "mainwindow.h"
+
 WebPage::WebPage(QObject *parent)
     : QWebPage(parent)
     , m_keyboardModifiers(Qt::NoModifier)
@@ -60,6 +62,7 @@ WebView::WebView(QWidget* parent)
     page()->setForwardUnsupportedContent(true);
 
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+
     connect(this, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
 }
 
@@ -122,7 +125,7 @@ void WebView::loadFinished()
                    << "Url:" << url();
     }
 
-    page()->mainFrame()->evaluateJavaScript(jQuery);
+    //page()->mainFrame()->evaluateJavaScript(jQuery);
 }
 
 void WebView::loadUrl(const QUrl &url)
@@ -161,6 +164,17 @@ void WebView::mouseReleaseEvent(QMouseEvent *event)
             setUrl(url);
         }
     }
+}
+
+void WebView::setStatusBarLable(QLabel* label)
+{
+    status_label_ = label;
+}
+
+void WebView::mouseMoveEvent(QMouseEvent *event)
+{
+    //parent_->mouseMoveEvent(event);
+    status_label_->setText("("+QString::number(event->x())+","+QString::number(event->y())+")");
 }
 
 void WebView::setStatusBarText(const QString &string)
