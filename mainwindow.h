@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QLabel>
-#include "../mywebpage.h"
+#include "mywebpage.h"
 
 namespace Ui {
 class MainWindow;
