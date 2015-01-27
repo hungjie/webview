@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>jquery.min.js</file>
+        <file>test.js</file>
     </qresource>
 </RCC>

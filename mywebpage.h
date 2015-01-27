@@ -6,12 +6,36 @@
 #include <QAction>
 #include <QMouseEvent>
 #include <QLabel>
+#include <QMap>
+#include <QTimer>
+
+class JsobjectInterface : public QObject
+{
+    Q_OBJECT
+public:
+    explicit JsobjectInterface(QObject *parent = 0);
+
+signals:
+    void signal(QMap<QString, QVariant> object);
+
+public slots:
+    //供javascript调用的槽
+    QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
+    void slotThatEmitsSignal();
+
+private:
+    int m_signalEmited;
+    QMap<QString, QVariant> m_returnObject;
+    QMap<QString, QVariant> m_emitSignal;
+};
 
 class WebPage : public QWebPage
 {
     Q_OBJECT
 public:
     explicit WebPage(QObject *parent = 0);
+
+    void moveMouse(int x, int y);
 
 signals:
     /*
@@ -23,6 +47,11 @@ signals:
 protected:
     bool acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type);//重写
 
+private slots:
+    void updateMouse();
+
+    void addJavaScriptObject();
+
 private:
     friend class WebView;
 
@@ -31,6 +60,12 @@ private:
     Qt::MouseButtons m_pressedButtons;
     bool m_openInNewTab;
     QUrl m_loadingUrl;
+    QTimer *mouseTimer_;
+    int x_;
+    int y_;
+
+    QString jQuery;
+    JsobjectInterface* jsQObject_;
  };
 
 class WebView : public QWebView {
@@ -69,7 +104,6 @@ private:
     QUrl m_initialUrl;
     int m_progress;
     WebPage *m_page;
-    QString jQuery;
     QLabel* status_label_;
 
 };

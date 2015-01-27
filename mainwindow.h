@@ -29,6 +29,8 @@ private slots:
 
     void on_actionMovetoweb_triggered();
 
+    void on_actionTimer_triggered();
+
 protected:
     void mouseMoveEvent(QMouseEvent *e);
 
