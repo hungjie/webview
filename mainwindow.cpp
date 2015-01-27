@@ -6,6 +6,7 @@
 #include <QErrorMessage>
 
 #include <QCursor>
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -68,13 +69,13 @@ void MainWindow::on_actionHighlight_links_triggered(bool checked)
     else
         code = "qt.jQuery('a').each( function () { qt.jQuery(this).css('background-color', 'null') } ); ";
 
-    v_->page()->mainFrame()->evaluateJavaScript(code);
+    v_->webPage()->mainFrame()->evaluateJavaScript(code);
 }
 
 void MainWindow::on_actionMove_triggered()
 {
     //QCursor::setPos(0,0);
-    QPoint p = ui->pushButton->pos();
+    QPoint p = v_->pos();
 
     //p = v_->mapFromParent(p);
 
@@ -95,4 +96,15 @@ void MainWindow::on_actionMovetoweb_triggered()
 void MainWindow::mouseMoveEvent(QMouseEvent *e)
 {
     msgLabel->setText("("+QString::number(e->x())+","+QString::number(e->y())+")");
+}
+
+void MainWindow::on_actionTimer_triggered()
+{
+    QPoint p = v_->pos();
+
+    //p = v_->mapFromParent(p);
+
+    p = this->mapToGlobal(p);
+
+    v_->webPage()->moveMouse(p.x(),p.y());
 }

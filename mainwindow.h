@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QLabel>
-#include "../mywebpage.h"
+#include "mywebpage.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +28,8 @@ private slots:
     void on_actionMove_triggered();
 
     void on_actionMovetoweb_triggered();
+
+    void on_actionTimer_triggered();
 
 protected:
     void mouseMoveEvent(QMouseEvent *e);
