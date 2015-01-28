@@ -4,6 +4,8 @@
 #include <QClipboard>
 #include <QNetworkRequest>
 
+#include <QNetworkCookie>
+
 #include <QWebFrame>
 #include <QCursor>
 
@@ -39,6 +41,76 @@ void JsobjectInterface::slotThatEmitsSignal()
     emit signal(this->m_emitSignal);
 }
 
+MyCookieJar::MyCookieJar(QObject *parent)
+    : QNetworkCookieJar(parent)
+{
+
+}
+
+MyCookieJar::~MyCookieJar()
+{
+}
+
+QList<QNetworkCookie> MyCookieJar::mycookies()
+{
+    return this->allCookies();
+}
+
+void MyCookieJar::setCookies(const QList<QNetworkCookie>& cookieList)
+{
+    this->setAllCookies(cookieList);
+}
+
+void MyCookieJar::clearCookies()
+{
+    QList<QNetworkCookie> cookieList;
+    this->setAllCookies(cookieList);
+}
+
+QList<QNetworkCookie> MyCookieJar::cookieByUrl(const QString &url)
+{
+    return this->cookiesForUrl(QUrl(url));
+}
+
+bool MyCookieJar::save()
+{
+    QFile file;
+    file.setFileName("cookie.dat");
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QList<QNetworkCookie> list = this->allCookies();
+    QByteArray str;
+    QNetworkCookie cookie;
+    foreach (cookie, list)
+    {
+        str += cookie.toRawForm() + "\n";
+    }
+
+    file.write(str);
+    //QTextStream stream(&file);
+    //stream << str;
+    file.close();
+
+    return true;
+}
+
+bool MyCookieJar::load()
+{
+    QFile file;
+    file.setFileName("cookie.dat");
+    file.open(QIODevice::ReadOnly);
+    QString str = file.readAll();
+    file.close();
+
+    if(!str.isEmpty())
+    {
+        this->setAllCookies(QNetworkCookie::parseCookies(str.toUtf8()));
+        return true;
+    }
+
+    return false;
+}
+
 WebPage::WebPage(QObject *parent)
     : QWebPage(parent)
     , m_keyboardModifiers(Qt::NoModifier)
@@ -57,6 +129,12 @@ WebPage::WebPage(QObject *parent)
     jQuery = file.readAll();
     jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
     file.close();
+
+    QFile file2;
+    file2.setFileName(":/test.js");
+    file2.open(QIODevice::ReadOnly);
+    jscript_ = file2.readAll();
+    file2.close();
 
     mouseTimer_ = new QTimer(this);
     connect(mouseTimer_, SIGNAL(timeout()), this, SLOT(updateMouse()));
@@ -111,6 +189,9 @@ void WebPage::addJavaScriptObject()
     mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
+
+    mainFrame()->evaluateJavaScript(jscript_);
+    mainFrame()->evaluateJavaScript(QString("func()"));
 }
 
 bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type)
@@ -128,10 +209,11 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
     return QWebPage::acceptNavigationRequest(frame, request, type);
 }
 
-WebView::WebView(QWidget* parent)
+WebView::WebView(QWidget* parent, MyCookieJar* cookieJar)
     : QWebView(parent)
     , m_progress(0)
     , m_page(new WebPage(this))
+    , cookieJar_(cookieJar)
 {
     setPage(m_page);
 
@@ -155,6 +237,13 @@ WebView::WebView(QWidget* parent)
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
     connect(this, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
+
+    if(cookieJar_ == NULL)
+    {
+        cookieJar_ = new MyCookieJar();
+        qDebug() << cookieJar_->load();
+    }
+    page()->networkAccessManager()->setCookieJar( cookieJar_ );
 }
 
 void WebView::contextMenuEvent(QContextMenuEvent *event)
@@ -207,6 +296,7 @@ void WebView::setProgress(int progress)
 void WebView::loadStarted()
 {
     m_progress = 0;
+    //webPage()->myCookie()->clearCookies();
 }
 
 void WebView::loadFinished()
@@ -220,6 +310,8 @@ void WebView::loadFinished()
 void WebView::loadUrl(const QUrl &url)
 {
     m_initialUrl = url;
+
+    cookieJar_->setCookiesFromUrl(cookieJar_->mycookies(), url);
     load(url);
 }
 

@@ -9,6 +9,9 @@
 #include <QMap>
 #include <QTimer>
 
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
+
 class JsobjectInterface : public QObject
 {
     Q_OBJECT
@@ -27,6 +30,28 @@ private:
     int m_signalEmited;
     QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
+};
+
+class MyCookieJar : public QNetworkCookieJar
+{
+    Q_OBJECT
+
+public:
+    explicit MyCookieJar(QObject *parent = 0);
+    ~MyCookieJar();
+
+    QList<QNetworkCookie> mycookies();
+
+    void setCookies(const QList<QNetworkCookie>& cookieList);
+
+    void clearCookies();
+
+    QList<QNetworkCookie> cookieByUrl(QString const& url);
+
+    bool save();
+    bool load();
+private:
+
 };
 
 class WebPage : public QWebPage
@@ -65,6 +90,7 @@ private:
     int y_;
 
     QString jQuery;
+    QString jscript_;
     JsobjectInterface* jsQObject_;
  };
 
@@ -72,7 +98,7 @@ class WebView : public QWebView {
     Q_OBJECT
 
 public:
-    WebView(QWidget *parent = 0);
+    WebView(QWidget *parent = 0, MyCookieJar* cookie=NULL);
     WebPage *webPage() const { return m_page; }
 
     void loadUrl(const QUrl &url);
@@ -82,6 +108,8 @@ public:
     inline int progress() const { return m_progress; }
 
     void setStatusBarLable(QLabel* label);
+
+    MyCookieJar* myCookie(){return cookieJar_;}
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -106,6 +134,7 @@ private:
     WebPage *m_page;
     QLabel* status_label_;
 
+    MyCookieJar *cookieJar_;
 };
 
 #endif // MYWEBPAGE_H

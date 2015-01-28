@@ -15,9 +15,11 @@ function slot(object) {
 
 function func() {
     try {
-        var object = {intValue: 1};
-        var returnedObject = jsQObject.slotThatReturns(object);
-        alert(returnedObject.stringValue);
+        //var object = {intValue: 2};
+        //var returnedObject = jsQObject.slotThatReturns(object);
+        //alert(returnedObject.stringValue);
+        //jsQObject.signal.connect(slot);
+        //jsQObject.slotThatEmitsSignal();
     }
     catch(e){
         alert(e);

@@ -89,8 +89,16 @@
     <addaction name="actionMovetoweb"/>
     <addaction name="actionTimer"/>
    </widget>
+   <widget class="QMenu" name="menuCookie">
+    <property name="title">
+     <string>cookie</string>
+    </property>
+    <addaction name="actionGetcookie"/>
+    <addaction name="actionSavecookie"/>
+   </widget>
    <addaction name="menuTool"/>
    <addaction name="menuCursor"/>
+   <addaction name="menuCookie"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionHighlight_links">
@@ -111,6 +119,16 @@
   <action name="actionTimer">
    <property name="text">
     <string>timer</string>
+   </property>
+  </action>
+  <action name="actionGetcookie">
+   <property name="text">
+    <string>getcookie</string>
+   </property>
+  </action>
+  <action name="actionSavecookie">
+   <property name="text">
+    <string>savecookie</string>
    </property>
   </action>
  </widget>
