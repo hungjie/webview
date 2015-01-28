@@ -38,7 +38,7 @@ void JsobjectInterface::slotThatEmitsSignal()
     this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
     this->m_emitSignal["sender"] = QVariant("SampleQObject::slotThatEmitsSignal");
     qDebug() << "SampleQObject::slotThatEmitsSignal" << this->m_emitSignal;
-    emit signal(this->m_emitSignal);
+    emit sendtojs(this->m_emitSignal);
 }
 
 MyCookieJar::MyCookieJar(QObject *parent)
@@ -131,7 +131,7 @@ WebPage::WebPage(QObject *parent)
     file.close();
 
     QFile file2;
-    file2.setFileName(":/test.js");
+    file2.setFileName("test.js");
     file2.open(QIODevice::ReadOnly);
     jscript_ = file2.readAll();
     file2.close();
@@ -186,7 +186,7 @@ void WebPage::updateMouse()
 
 void WebPage::addJavaScriptObject()
 {
-    mainFrame()->evaluateJavaScript(jQuery);
+    //mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 

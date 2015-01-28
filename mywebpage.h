@@ -19,7 +19,7 @@ public:
     explicit JsobjectInterface(QObject *parent = 0);
 
 signals:
-    void signal(QMap<QString, QVariant> object);
+    void sendtojs(QMap<QString, QVariant> object);
 
 public slots:
     //供javascript调用的槽

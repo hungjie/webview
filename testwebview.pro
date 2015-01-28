@@ -23,5 +23,4 @@ FORMS    += mainwindow.ui
 
 OTHER_FILES +=
 
-RESOURCES += \
-    jquery.qrc
+RESOURCES +=

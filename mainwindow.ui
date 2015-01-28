@@ -95,6 +95,7 @@
     </property>
     <addaction name="actionGetcookie"/>
     <addaction name="actionSavecookie"/>
+    <addaction name="actionClearcookie"/>
    </widget>
    <addaction name="menuTool"/>
    <addaction name="menuCursor"/>
@@ -129,6 +130,11 @@
   <action name="actionSavecookie">
    <property name="text">
     <string>savecookie</string>
+   </property>
+  </action>
+  <action name="actionClearcookie">
+   <property name="text">
+    <string>clearcookie</string>
    </property>
   </action>
  </widget>

@@ -130,3 +130,8 @@ void MainWindow::on_actionSavecookie_triggered()
 {
     qDebug() << v_->myCookie()->save();
 }
+
+void MainWindow::on_actionClearcookie_triggered()
+{
+    v_->myCookie()->clearCookies();
+}

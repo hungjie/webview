@@ -35,6 +35,8 @@ private slots:
 
     void on_actionSavecookie_triggered();
 
+    void on_actionClearcookie_triggered();
+
 protected:
     void mouseMoveEvent(QMouseEvent *e);
 
