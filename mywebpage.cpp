@@ -41,6 +41,11 @@ void JsobjectInterface::slotThatEmitsSignal()
     emit sendtojs(this->m_emitSignal);
 }
 
+void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
+{
+
+}
+
 MyCookieJar::MyCookieJar(QObject *parent)
     : QNetworkCookieJar(parent)
 {
@@ -124,7 +129,7 @@ WebPage::WebPage(QObject *parent)
     //        this, SLOT(handleUnsupportedContent(QNetworkReply*)));
 
     QFile file;
-    file.setFileName(":/jquery.min.js");
+    file.setFileName("jquery.min.js");
     file.open(QIODevice::ReadOnly);
     jQuery = file.readAll();
     jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
@@ -150,6 +155,26 @@ void WebPage::moveMouse(int x, int y)
     x_ = x;
     y_ = y;
     mouseTimer_->start(10);
+}
+
+void WebPage::lefeMouseClicked()
+{
+    QMouseEvent *mEvnPress;
+    QMouseEvent *mEvnRelease;
+    mEvnPress = new QMouseEvent(QEvent::MouseButtonPress, QCursor::pos(), Qt::LeftButton, Qt::LeftButton,Qt::NoModifier);
+    QApplication::sendEvent(this, mEvnPress);
+    mEvnRelease = new QMouseEvent(QEvent::MouseButtonRelease, QCursor::pos(), Qt::LeftButton, Qt::LeftButton,Qt::NoModifier);
+    QApplication::sendEvent(this, mEvnRelease);
+}
+
+void WebPage::scrollMouse(int left, int right)
+{
+    mainFrame()->scroll(left, right);
+}
+
+void WebPage::startJS(const QString &func)
+{
+    mainFrame()->evaluateJavaScript(func);
 }
 
 void WebPage::updateMouse()
@@ -186,12 +211,12 @@ void WebPage::updateMouse()
 
 void WebPage::addJavaScriptObject()
 {
-    //mainFrame()->evaluateJavaScript(jQuery);
+    mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
     mainFrame()->evaluateJavaScript(jscript_);
-    mainFrame()->evaluateJavaScript(QString("func()"));
+    //mainFrame()->evaluateJavaScript(QString("func()"));
 }
 
 bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type)
@@ -207,6 +232,17 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
     }
     */
     return QWebPage::acceptNavigationRequest(frame, request, type);
+}
+
+QString WebPage::userAgentForUrl(const QUrl &url) const
+{
+    //return "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
+    return "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:8.0) Gecko/20100101 Firefox/8.0";
+}
+
+QPoint WebPage::scrollBar()
+{
+    return mainFrame()->scrollPosition();
 }
 
 WebView::WebView(QWidget* parent, MyCookieJar* cookieJar)
@@ -304,7 +340,7 @@ void WebView::loadFinished()
     if (100 != m_progress) {
         qWarning() << "Received finished signal while progress is still:" << progress()
                    << "Url:" << url();
-    }    
+    }
 }
 
 void WebView::loadUrl(const QUrl &url)

@@ -12,6 +12,8 @@
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
 
+#include <QScrollBar>
+
 class JsobjectInterface : public QObject
 {
     Q_OBJECT
@@ -25,6 +27,7 @@ public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
     void slotThatEmitsSignal();
+    void scroll(const QMap<QString, QVariant>& object);
 
 private:
     int m_signalEmited;
@@ -61,6 +64,11 @@ public:
     explicit WebPage(QObject *parent = 0);
 
     void moveMouse(int x, int y);
+    void lefeMouseClicked();
+    void scrollMouse(int left, int right);
+
+    void startJS(QString const& func);
+    QPoint scrollBar();
 
 signals:
     /*
@@ -71,6 +79,7 @@ signals:
 
 protected:
     bool acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type);//重写
+    QString userAgentForUrl( const QUrl & url ) const;
 
 private slots:
     void updateMouse();
