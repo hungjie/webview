@@ -56,6 +56,12 @@ private slots:
 
     void on_actionStatus_triggered();
 
+    void on_actionSetfirst_triggered();
+
+    void on_actionSetsecond_triggered();
+
+    void on_actionSetthird_triggered();
+
 protected:
     void mouseMoveEvent(QMouseEvent *e);
 

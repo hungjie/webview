@@ -159,3 +159,18 @@ void MainWindow::on_actionStatus_triggered()
 
     //qDebug() << p.x() << "," << p.y() ;
 }
+
+void MainWindow::on_actionSetfirst_triggered()
+{
+    t_->setCurrentIndex(0);
+}
+
+void MainWindow::on_actionSetsecond_triggered()
+{
+    t_->setCurrentIndex(1);
+}
+
+void MainWindow::on_actionSetthird_triggered()
+{
+    t_->setCurrentIndex(2);
+}

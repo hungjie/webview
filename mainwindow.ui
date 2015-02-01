@@ -104,10 +104,20 @@
     <addaction name="actionScroll"/>
     <addaction name="actionStatus"/>
    </widget>
+   <widget class="QMenu" name="menuTab">
+    <property name="title">
+     <string>tab</string>
+    </property>
+    <addaction name="actionSetfirst"/>
+    <addaction name="separator"/>
+    <addaction name="actionSetsecond"/>
+    <addaction name="actionSetthird"/>
+   </widget>
    <addaction name="menuTool"/>
    <addaction name="menuCursor"/>
    <addaction name="menuCookie"/>
    <addaction name="menuScroll"/>
+   <addaction name="menuTab"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionHighlight_links">
@@ -153,6 +163,21 @@
   <action name="actionStatus">
    <property name="text">
     <string>status</string>
+   </property>
+  </action>
+  <action name="actionSetfirst">
+   <property name="text">
+    <string>setfirst</string>
+   </property>
+  </action>
+  <action name="actionSetsecond">
+   <property name="text">
+    <string>setsecond</string>
+   </property>
+  </action>
+  <action name="actionSetthird">
+   <property name="text">
+    <string>setthird</string>
    </property>
   </action>
  </widget>

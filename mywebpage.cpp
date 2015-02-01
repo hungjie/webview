@@ -499,6 +499,12 @@ void TabWidget::closeTab(int index)
         return;
 
     removeTab(index);
+
+    /*
+    QWidget *webView = widget(index);
+    if(webView)
+        webView->deleteLater();
+    */
 }
 
 void TabWidget::currentChanged(int index)
