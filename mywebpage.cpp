@@ -8,6 +8,9 @@
 
 #include <QWebFrame>
 #include <QCursor>
+#include <QPalette>
+
+//#include <QtWebEngineWidgets/QWebEnginePage>
 
 #include "mainwindow.h"
 
@@ -211,7 +214,7 @@ void WebPage::updateMouse()
 
 void WebPage::addJavaScriptObject()
 {
-    mainFrame()->evaluateJavaScript(jQuery);
+//    mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
@@ -231,6 +234,22 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
 
     }
     */
+    if (type == 0 && m_pressedButtons == Qt::MidButton) {
+        WebView *webView;
+        //bool selectNewTab = (m_keyboardModifiers & Qt::ShiftModifier);
+        webView = MainWindow::Instance()->tabWidget()->newTab(true);
+
+        webView->setFocus();
+
+        webView->load(request);
+        m_keyboardModifiers = Qt::NoModifier;
+        m_pressedButtons = Qt::NoButton;
+        return false;
+    }
+
+    m_loadingUrl = request.url();
+    emit loadingUrl(m_loadingUrl);
+
     return QWebPage::acceptNavigationRequest(frame, request, type);
 }
 
@@ -385,13 +404,13 @@ void WebView::mouseReleaseEvent(QMouseEvent *event)
 
 void WebView::setStatusBarLable(QLabel* label)
 {
-    status_label_ = label;
+    //status_label_ = label;
 }
 
 void WebView::mouseMoveEvent(QMouseEvent *event)
 {
     //parent_->mouseMoveEvent(event);
-    status_label_->setText("("+QString::number(event->x())+","+QString::number(event->y())+")");
+    //status_label_->setText("("+QString::number(event->x())+","+QString::number(event->y())+")");
 }
 
 void WebView::setStatusBarText(const QString &string)
@@ -408,4 +427,119 @@ void WebView::linkClicked(QUrl const& url)
 {
     loadUrl(url);
     //ui->lineEdit->setText(url.toString());
+}
+
+
+TabBar::TabBar(QWidget *parent)
+    : QTabBar(parent)
+{
+    setTabsClosable(true);
+    connect(this, SIGNAL(tabCloseRequested(int)),
+            this, SIGNAL(closeTab(int)));
+    setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
+}
+
+void TabBar::closeTab()
+{
+    if (QAction *action = qobject_cast<QAction*>(sender())) {
+        int index = action->data().toInt();
+        emit closeTab(index);
+    }
+}
+
+TabWidget::TabWidget(QWidget *parent)
+    : QTabWidget(parent)
+    , m_tabBar(new TabBar(this))
+{
+    connect(m_tabBar, SIGNAL(closeTab(int)), this, SLOT(closeTab(int)));
+
+    setTabBar(m_tabBar);
+
+    setDocumentMode(true);
+
+    newTab(true);
+}
+
+WebView *TabWidget::newTab(bool makeCurrent)
+{
+    //*
+    if (count() == 0) {
+        QWidget *emptyWidget = new QWidget;
+        QPalette p = emptyWidget->palette();
+        p.setColor(QPalette::Window, palette().color(QPalette::Base));
+        emptyWidget->setPalette(p);
+        emptyWidget->setAutoFillBackground(true);
+        disconnect(this, SIGNAL(currentChanged(int)),this, SLOT(currentChanged(int)));
+        addTab(emptyWidget, tr("(Untitled)"));
+        connect(this, SIGNAL(currentChanged(int)),this, SLOT(currentChanged(int)));
+        return 0;
+    }
+    //*/
+
+    // webview
+    WebView *webView = new WebView;
+
+    webView->setMouseTracking(true);
+
+    addTab(webView, tr("(Untitled)"));
+    if (makeCurrent)
+        setCurrentWidget(webView);
+
+    if (count() == 1)
+        currentChanged(currentIndex());
+    //emit tabsChanged();
+    return webView;
+}
+
+void TabWidget::closeTab(int index)
+{
+    if (index < 0)
+        index = currentIndex();
+    if (index < 0 || index >= count())
+        return;
+
+    removeTab(index);
+}
+
+void TabWidget::currentChanged(int index)
+{
+    WebView *webView = this->webView(index);
+    if (!webView)
+        return;
+
+    webView->setFocus();
+}
+
+WebView *TabWidget::webView(int index) const
+{
+    QWidget *widget = this->widget(index);
+    if (WebView *webView = qobject_cast<WebView*>(widget)) {
+        return webView;
+    } else {
+        // optimization to delay creating the first webview
+        if (count() == 1) {
+            TabWidget *that = const_cast<TabWidget*>(this);
+            that->setUpdatesEnabled(false);
+            that->newTab();
+            that->closeTab(0);
+            that->setUpdatesEnabled(true);
+            return currentWebView();
+        }
+    }
+
+    return 0;
+}
+
+WebView *TabWidget::currentWebView() const
+{
+    return webView(currentIndex());
+}
+
+void TabWidget::loadUrlInCurrentTab(const QUrl &url)
+{
+    WebView *webView = currentWebView();
+    if (webView) {
+        webView->loadUrl(url);
+        webView->setFocus();
+    }
 }

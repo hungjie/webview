@@ -18,6 +18,21 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    static MainWindow* Instance()
+    {
+        if(!owner_)
+        {
+            owner_ = new MainWindow();
+        }
+
+        return owner_;
+    }
+
+    TabWidget* tabWidget()
+    {
+        return t_;
+    }
+
 private slots:
     void on_pushButton_clicked();
 
@@ -47,9 +62,12 @@ protected:
 private:
     Ui::MainWindow *ui;
     WebView* v_;
+    TabWidget* t_;
     QString jQuery;
 
     QLabel* msgLabel;
+
+    static MainWindow* owner_;
 };
 
 #endif // MAINWINDOW_H

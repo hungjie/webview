@@ -14,6 +14,50 @@
 
 #include <QScrollBar>
 
+#include <QTabWidget>
+#include <QTabBar>
+
+class WebView;
+
+class TabBar : public QTabBar
+{
+    Q_OBJECT
+
+signals:
+    void closeTab(int index);
+
+public:
+    TabBar(QWidget *parent = 0);
+
+private slots:
+    void closeTab();
+
+private:
+    friend class TabWidget;
+};
+
+class TabWidget : public QTabWidget
+{
+    Q_OBJECT
+public:
+    explicit TabWidget(QWidget *parent = 0);
+
+    WebView *webView(int index) const;
+    WebView *currentWebView() const;
+
+public slots:
+    WebView *newTab(bool makeCurrent = true);
+    void closeTab(int index = -1);
+
+    void loadUrlInCurrentTab(const QUrl &url);
+
+private slots:
+    void currentChanged(int index);
+
+private:
+    TabBar *m_tabBar;
+};
+
 class JsobjectInterface : public QObject
 {
     Q_OBJECT
