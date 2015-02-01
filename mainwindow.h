@@ -31,6 +31,16 @@ private slots:
 
     void on_actionTimer_triggered();
 
+    void on_actionGetcookie_triggered();
+
+    void on_actionSavecookie_triggered();
+
+    void on_actionClearcookie_triggered();
+
+    void on_actionScroll_triggered();
+
+    void on_actionStatus_triggered();
+
 protected:
     void mouseMoveEvent(QMouseEvent *e);
 

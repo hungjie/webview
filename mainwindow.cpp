@@ -8,6 +8,8 @@
 #include <QCursor>
 #include <QThread>
 
+#include <QNetworkCookie>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -107,4 +109,42 @@ void MainWindow::on_actionTimer_triggered()
     p = this->mapToGlobal(p);
 
     v_->webPage()->moveMouse(p.x(),p.y());
+}
+
+void MainWindow::on_actionGetcookie_triggered()
+{
+    QNetworkCookie cookie;
+    QList<QNetworkCookie> list;
+    list = v_->myCookie()->mycookies();
+    //list = v_->myCookie()->cookieByUrl("http://www.baidu.com");
+
+    foreach (cookie ,list)
+    {
+        qDebug()<< "---------------------";
+        qDebug()<< cookie.name();
+        qDebug()<< cookie.value();
+    }
+}
+
+void MainWindow::on_actionSavecookie_triggered()
+{
+    qDebug() << v_->myCookie()->save();
+}
+
+void MainWindow::on_actionClearcookie_triggered()
+{
+    v_->myCookie()->clearCookies();
+}
+
+void MainWindow::on_actionScroll_triggered()
+{
+    //v_->webPage()->scrollMouse(1,1);
+    v_->webPage()->startJS("testpos()");
+}
+
+void MainWindow::on_actionStatus_triggered()
+{
+    QPoint p = v_->webPage()->scrollBar();
+
+    qDebug() << p.x() << "," << p.y() ;
 }
