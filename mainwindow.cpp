@@ -11,6 +11,7 @@
 #include <QNetworkCookie>
 
 MainWindow* MainWindow::owner_  = 0;
+MyCookieJar* MainWindow::mycookie_ = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -42,7 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    qDebug() << myCookie()->save();
     delete ui;
+    delete myCookie();
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -105,7 +108,7 @@ void MainWindow::on_actionMovetoweb_triggered()
 
 void MainWindow::mouseMoveEvent(QMouseEvent *e)
 {
-    //msgLabel->setText("("+QString::number(e->x())+","+QString::number(e->y())+")");
+    msgLabel->setText("("+QString::number(e->x())+","+QString::number(e->y())+")");
 }
 
 void MainWindow::on_actionTimer_triggered()
@@ -113,19 +116,33 @@ void MainWindow::on_actionTimer_triggered()
     //QPoint p = v_->pos();
 
     //p = v_->mapFromParent(p);
-    //QPoint p(0, 0);
+    /*
+    QPoint p(0, 0);
 
-    //p = v_->mapToGlobal(p);
+    p = t_->currentWebView()->mapToGlobal(p);
 
-    //v_->webPage()->moveMouse(p.x(),p.y());
+    t_->currentWebView()->webPage()->moveMouse(p.x(),p.y());
+    */
+
+    QPoint p = ui->pushButton->pos();
+    p.setY(p.y() + 95);
+    p.setX(p.x() + 120);
+
+    p = this->mapToGlobal(p);
+
+    QCursor::setPos(p);
+
+    //t_->currentWebView()->webPage()->lefeMouseClicked();
+    //::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, p.x(), p.y(), 0, 0);
+    MouseOperator op(p.x(), p.y());
+    op.LBClick();
 }
 
 void MainWindow::on_actionGetcookie_triggered()
 {
-    /*
     QNetworkCookie cookie;
     QList<QNetworkCookie> list;
-    list = v_->myCookie()->mycookies();
+    list = myCookie()->mycookies();
     //list = v_->myCookie()->cookieByUrl("http://www.baidu.com");
 
     foreach (cookie ,list)
@@ -134,30 +151,29 @@ void MainWindow::on_actionGetcookie_triggered()
         qDebug()<< cookie.name();
         qDebug()<< cookie.value();
     }
-    */
 }
 
 void MainWindow::on_actionSavecookie_triggered()
 {
-    //qDebug() << v_->myCookie()->save();
+    qDebug() << myCookie()->save();
 }
 
 void MainWindow::on_actionClearcookie_triggered()
 {
-    //v_->myCookie()->clearCookies();
+    myCookie()->clearCookies();
 }
 
 void MainWindow::on_actionScroll_triggered()
 {
-    //v_->webPage()->scrollMouse(1,1);
-    //v_->webPage()->startJS("testpos()");
+    t_->currentWebView()->webPage()->scrollMouse(1,1);
+    t_->currentWebView()->webPage()->startJS("testpos()");
 }
 
 void MainWindow::on_actionStatus_triggered()
 {
-    //QPoint p = v_->webPage()->scrollBar();
+    QPoint p = t_->currentWebView()->webPage()->scrollBar();
 
-    //qDebug() << p.x() << "," << p.y() ;
+    qDebug() << p.x() << "," << p.y() ;
 }
 
 void MainWindow::on_actionSetfirst_triggered()
@@ -173,4 +189,8 @@ void MainWindow::on_actionSetsecond_triggered()
 void MainWindow::on_actionSetthird_triggered()
 {
     t_->setCurrentIndex(2);
+}
+
+void MainWindow::on_MainWindow_destroyed()
+{
 }

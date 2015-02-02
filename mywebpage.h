@@ -1,6 +1,8 @@
 #ifndef MYWEBPAGE_H
 #define MYWEBPAGE_H
 
+#include "windows.h"
+
 #include <QWebPage>
 #include <QWebView>
 #include <QAction>
@@ -18,6 +20,45 @@
 #include <QTabBar>
 
 class WebView;
+
+class MouseOperator
+{
+public:
+    explicit MouseOperator(int x, int y)
+    {
+        x_ = x;
+        y_ = y;
+    }
+
+    void LBClick()
+    {
+        ::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
+    }
+
+    void Move(int x, int y)
+    {
+        x_ = x;
+        y_ = y;
+
+        ::SetCursorPos(x, y);
+    }
+
+    //中键按下
+    void MBClick()
+    {
+        ::mouse_event(MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP, x_, y_, 0, 0);
+    }
+
+    //中键滚动
+    void MBRoll(int ch)
+    {
+        ::mouse_event(MOUSEEVENTF_WHEEL, x_, y_, ch, 0);
+    }
+
+private:
+    int x_;
+    int y_;
+};
 
 class TabBar : public QTabBar
 {
@@ -65,13 +106,24 @@ public:
     explicit JsobjectInterface(QObject *parent = 0);
 
 signals:
-    void sendtojs(QMap<QString, QVariant> object);
+    void Sendtojs(QMap<QString, QVariant> object);
+
+    void LBClick(QMap<QString, QVariant> object);
+    void Move(QMap<QString, QVariant> object);
+    void MBClick(QMap<QString, QVariant> object);
+    void MBRoll(QMap<QString, QVariant> object);
+
+    void Scroll(const QMap<QString, QVariant>& object);
 
 public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
     void slotThatEmitsSignal();
     void scroll(const QMap<QString, QVariant>& object);
+    void lbclick(const QMap<QString, QVariant>& object);
+    void move(const QMap<QString, QVariant>& object);
+    void mbclick(QMap<QString, QVariant>& object);
+    void mbroll(QMap<QString, QVariant>& object);
 
 private:
     int m_signalEmited;
@@ -151,7 +203,7 @@ class WebView : public QWebView {
     Q_OBJECT
 
 public:
-    WebView(QWidget *parent = 0, MyCookieJar* cookie=NULL);
+    WebView(QWidget *parent = 0);
     WebPage *webPage() const { return m_page; }
 
     void loadUrl(const QUrl &url);
@@ -160,9 +212,7 @@ public:
     QString lastStatusBarText() const;
     inline int progress() const { return m_progress; }
 
-    void setStatusBarLable(QLabel* label);
-
-    MyCookieJar* myCookie(){return cookieJar_;}
+    MyCookieJar* myCookie();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -185,9 +235,6 @@ private:
     QUrl m_initialUrl;
     int m_progress;
     WebPage *m_page;
-    QLabel* status_label_;
-
-    MyCookieJar *cookieJar_;
 };
 
 #endif // MYWEBPAGE_H

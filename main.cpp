@@ -5,7 +5,11 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow* w = MainWindow::Instance();
-    w->show();
 
-    return a.exec();
+    w->show();
+    int status = a.exec();
+
+    delete w;
+
+    return status;
 }
