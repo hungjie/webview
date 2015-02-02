@@ -20,7 +20,7 @@ function func() {
         //var returnedObject = jsQObject.slotThatReturns(object);
         //alert(returnedObject.stringValue);
         dump_obj(jsQObject);
-        jsQObject.sendtojs.connect(slotfrom);
+        jsQObject.Sendtojs.connect(slotfrom);
         jsQObject.slotThatEmitsSignal();
     }
     catch(e){
@@ -38,7 +38,7 @@ function dump_obj(myObject) {
 
 function testpos()
 {
-    alert("start");
+    //alert("start");
     // > a[href='http://big.taobao.com/?spm=1.7388829.a214tlt.19']
     var e = qt.jQuery("#OSC_Links");
     var top = e.offset().top;

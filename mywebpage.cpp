@@ -10,9 +10,11 @@
 #include <QCursor>
 #include <QPalette>
 
-//#include <QtWebEngineWidgets/QWebEnginePage>
+#include <QThread>
 
 #include "mainwindow.h"
+
+//#include <QtWebEngineWidgets/QWebEnginePage>
 
 JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(parent)
@@ -25,8 +27,7 @@ QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, Q
     qDebug() << "SampleQObject::slotThatReturns";
     this->m_returnObject.clear();
     this->m_returnObject.unite(object);
-    QString addedBonus = QString::number(object["intValue"].toInt(),
-                                         10).append(" added bonus.");
+    QString addedBonus = QString::number(object["intValue"].toInt(), 10).append(" added bonus.");
     this->m_returnObject["stringValue"] = QVariant(addedBonus);
     qDebug() << "SampleQObject::slotThatReturns" << this->m_returnObject;
 
@@ -162,12 +163,7 @@ void WebPage::moveMouse(int x, int y)
 
 void WebPage::lefeMouseClicked()
 {
-    QMouseEvent *mEvnPress;
-    QMouseEvent *mEvnRelease;
-    mEvnPress = new QMouseEvent(QEvent::MouseButtonPress, QCursor::pos(), Qt::LeftButton, Qt::LeftButton,Qt::NoModifier);
-    QApplication::sendEvent(this, mEvnPress);
-    mEvnRelease = new QMouseEvent(QEvent::MouseButtonRelease, QCursor::pos(), Qt::LeftButton, Qt::LeftButton,Qt::NoModifier);
-    QApplication::sendEvent(this, mEvnRelease);
+
 }
 
 void WebPage::scrollMouse(int left, int right)
@@ -214,7 +210,7 @@ void WebPage::updateMouse()
 
 void WebPage::addJavaScriptObject()
 {
-//    mainFrame()->evaluateJavaScript(jQuery);
+    mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
@@ -264,11 +260,10 @@ QPoint WebPage::scrollBar()
     return mainFrame()->scrollPosition();
 }
 
-WebView::WebView(QWidget* parent, MyCookieJar* cookieJar)
+WebView::WebView(QWidget* parent)
     : QWebView(parent)
     , m_progress(0)
     , m_page(new WebPage(this))
-    , cookieJar_(cookieJar)
 {
     setPage(m_page);
 
@@ -293,12 +288,14 @@ WebView::WebView(QWidget* parent, MyCookieJar* cookieJar)
 
     connect(this, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClicked(QUrl)));
 
+    /*
     if(cookieJar_ == NULL)
     {
         cookieJar_ = new MyCookieJar();
         qDebug() << cookieJar_->load();
     }
-    page()->networkAccessManager()->setCookieJar( cookieJar_ );
+    */
+    page()->networkAccessManager()->setCookieJar( MainWindow::Instance()->myCookie() );
 }
 
 void WebView::contextMenuEvent(QContextMenuEvent *event)
@@ -366,7 +363,7 @@ void WebView::loadUrl(const QUrl &url)
 {
     m_initialUrl = url;
 
-    cookieJar_->setCookiesFromUrl(cookieJar_->mycookies(), url);
+    myCookie()->setCookiesFromUrl(myCookie()->mycookies(), url);
     load(url);
 }
 
@@ -402,15 +399,15 @@ void WebView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void WebView::setStatusBarLable(QLabel* label)
+MyCookieJar *WebView::myCookie()
 {
-    //status_label_ = label;
+    return MainWindow::Instance()->myCookie();
 }
 
 void WebView::mouseMoveEvent(QMouseEvent *event)
 {
     //parent_->mouseMoveEvent(event);
-    //status_label_->setText("("+QString::number(event->x())+","+QString::number(event->y())+")");
+    MainWindow::Instance()->statusLabel()->setText("("+QString::number(event->x())+","+QString::number(event->y())+")");
 }
 
 void WebView::setStatusBarText(const QString &string)

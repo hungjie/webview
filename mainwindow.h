@@ -28,9 +28,25 @@ public:
         return owner_;
     }
 
+    static MyCookieJar* myCookie()
+    {
+        if(!mycookie_)
+        {
+            mycookie_ = new MyCookieJar();
+            qDebug() << mycookie_->load();
+        }
+
+        return mycookie_;
+    }
+
     TabWidget* tabWidget()
     {
         return t_;
+    }
+
+    QLabel* statusLabel()
+    {
+        return msgLabel;
     }
 
 private slots:
@@ -62,18 +78,20 @@ private slots:
 
     void on_actionSetthird_triggered();
 
+    void on_MainWindow_destroyed();
+
 protected:
     void mouseMoveEvent(QMouseEvent *e);
 
 private:
     Ui::MainWindow *ui;
-    WebView* v_;
+    //WebView* v_;
     TabWidget* t_;
     QString jQuery;
-
     QLabel* msgLabel;
 
     static MainWindow* owner_;
+    static MyCookieJar* mycookie_;
 };
 
 #endif // MAINWINDOW_H
