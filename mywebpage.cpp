@@ -16,10 +16,40 @@
 
 //#include <QtWebEngineWidgets/QWebEnginePage>
 
+#define NOMINMAX
+#include "windows.h"
+
+void MouseOperator::LBClick()
+{
+    ::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
+}
+
+void MouseOperator::Move(int x, int y)
+{
+    x_ = x;
+    y_ = y;
+
+    ::SetCursorPos(x, y);
+}
+
+//中键按下
+void MouseOperator::MBClick()
+{
+    ::mouse_event(MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP, x_, y_, 0, 0);
+}
+
+//中键滚动
+void MouseOperator::MBRoll(int ch)
+{
+    ::mouse_event(MOUSEEVENTF_WHEEL, x_, y_, ch, 0);
+}
+
 JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(parent)
 {
     m_signalEmited = 0;
+
+    page_ = qobject_cast<WebPage*>(parent);
 }
 
 QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, QVariant>& object)
@@ -42,10 +72,30 @@ void JsobjectInterface::slotThatEmitsSignal()
     this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
     this->m_emitSignal["sender"] = QVariant("SampleQObject::slotThatEmitsSignal");
     qDebug() << "SampleQObject::slotThatEmitsSignal" << this->m_emitSignal;
-    emit sendtojs(this->m_emitSignal);
+    emit Sendtojs(this->m_emitSignal);
 }
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
+{
+
+}
+
+void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
+{
+
+}
+
+void JsobjectInterface::move(const QMap<QString, QVariant> &object)
+{
+
+}
+
+void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
+{
+
+}
+
+void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
 {
 
 }
@@ -154,6 +204,12 @@ WebPage::WebPage(QObject *parent)
             this, SLOT(addJavaScriptObject()));
 }
 
+WebPage::~WebPage()
+{
+    //delete jsQObject_;
+    //delete mouseTimer_;
+}
+
 void WebPage::moveMouse(int x, int y)
 {
     x_ = x;
@@ -210,7 +266,7 @@ void WebPage::updateMouse()
 
 void WebPage::addJavaScriptObject()
 {
-    mainFrame()->evaluateJavaScript(jQuery);
+    //mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
@@ -233,7 +289,7 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
     if (type == 0 && m_pressedButtons == Qt::MidButton) {
         WebView *webView;
         //bool selectNewTab = (m_keyboardModifiers & Qt::ShiftModifier);
-        webView = MainWindow::Instance()->tabWidget()->newTab(true);
+        webView = MainWindow::Instance()->tabWidget()->newTab(false);
 
         webView->setFocus();
 
@@ -296,6 +352,11 @@ WebView::WebView(QWidget* parent)
     }
     */
     page()->networkAccessManager()->setCookieJar( MainWindow::Instance()->myCookie() );
+}
+
+WebView::~WebView()
+{
+    //delete m_page;
 }
 
 void WebView::contextMenuEvent(QContextMenuEvent *event)
@@ -500,8 +561,14 @@ void TabWidget::closeTab(int index)
     /*
     QWidget *webView = widget(index);
     if(webView)
-        webView->deleteLater();
-    */
+        delete webView;
+    //*/
+/*
+    if(count() == 0)
+    {
+        newTab(true);
+    }
+*/
 }
 
 void TabWidget::currentChanged(int index)

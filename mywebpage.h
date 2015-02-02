@@ -1,8 +1,6 @@
 #ifndef MYWEBPAGE_H
 #define MYWEBPAGE_H
 
-#include "windows.h"
-
 #include <QWebPage>
 #include <QWebView>
 #include <QAction>
@@ -19,6 +17,7 @@
 #include <QTabWidget>
 #include <QTabBar>
 
+class WebPage;
 class WebView;
 
 class MouseOperator
@@ -30,30 +29,15 @@ public:
         y_ = y;
     }
 
-    void LBClick()
-    {
-        ::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
-    }
+    void LBClick();
 
-    void Move(int x, int y)
-    {
-        x_ = x;
-        y_ = y;
-
-        ::SetCursorPos(x, y);
-    }
+    void Move(int x, int y);
 
     //中键按下
-    void MBClick()
-    {
-        ::mouse_event(MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP, x_, y_, 0, 0);
-    }
+    void MBClick();
 
     //中键滚动
-    void MBRoll(int ch)
-    {
-        ::mouse_event(MOUSEEVENTF_WHEEL, x_, y_, ch, 0);
-    }
+    void MBRoll(int ch);
 
 private:
     int x_;
@@ -119,6 +103,7 @@ public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
     void slotThatEmitsSignal();
+
     void scroll(const QMap<QString, QVariant>& object);
     void lbclick(const QMap<QString, QVariant>& object);
     void move(const QMap<QString, QVariant>& object);
@@ -129,6 +114,8 @@ private:
     int m_signalEmited;
     QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
+
+    WebPage* page_;
 };
 
 class MyCookieJar : public QNetworkCookieJar
@@ -158,6 +145,7 @@ class WebPage : public QWebPage
     Q_OBJECT
 public:
     explicit WebPage(QObject *parent = 0);
+    ~WebPage();
 
     void moveMouse(int x, int y);
     void lefeMouseClicked();
@@ -204,6 +192,8 @@ class WebView : public QWebView {
 
 public:
     WebView(QWidget *parent = 0);
+    ~WebView();
+
     WebPage *webPage() const { return m_page; }
 
     void loadUrl(const QUrl &url);
