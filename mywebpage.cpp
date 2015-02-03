@@ -12,6 +12,8 @@
 
 #include <QThread>
 
+#include <QErrorMessage>
+
 #include "mainwindow.h"
 
 //#include <QtWebEngineWidgets/QWebEnginePage>
@@ -45,11 +47,16 @@ void MouseOperator::MBRoll(int ch)
 }
 
 JsobjectInterface::JsobjectInterface(QObject *parent)
-    : QObject(parent)
+    : QObject(0)
+    , page_(parent)
 {
     m_signalEmited = 0;
 
-    page_ = qobject_cast<WebPage*>(parent);
+    mouseMoveTimer_ = new QTimer(this);
+    connect(mouseMoveTimer_, SIGNAL(timeout()), this, SLOT(updateMouseMove()));
+
+    mouseScrollTimer_ = new QTimer(this);
+    connect(mouseScrollTimer_, SIGNAL(timeout()), this, SLOT(updateMouseScroll()));
 }
 
 QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, QVariant>& object)
@@ -77,7 +84,14 @@ void JsobjectInterface::slotThatEmitsSignal()
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 {
+    int left = object["left"].toInt();
+    int top = object["top"].toInt();
 
+//    QErrorMessage m(0);
+//    m.showMessage(QString::number(left) + "," + QString::number(top));
+//    m.exec();
+
+    qobject_cast<WebPage*>(page_)->scrollBar(left, top);
 }
 
 void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
@@ -87,7 +101,10 @@ void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::move(const QMap<QString, QVariant> &object)
 {
+    move_x_ = object["x"].toInt();
+    move_y_ = object["y"].toInt();
 
+    mouseMoveTimer_->start(50);
 }
 
 void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
@@ -96,6 +113,43 @@ void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
 }
 
 void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
+{
+
+}
+
+void JsobjectInterface::updateMouseMove()
+{
+    QPoint p = QCursor::pos();
+    int x = p.x();
+    int y = p.y();
+
+    if(x > move_x_)
+    {
+        x = x - 1;
+    }
+    else if( x < move_x_)
+    {
+        x = x + 1;
+    }
+
+    if(y > move_y_)
+    {
+        y = y -1;
+    }
+    else if(y < move_y_)
+    {
+        y = y + 1;
+    }
+
+    QCursor::setPos(x, y);
+
+    if(x == move_x_ && y == move_y_)
+    {
+        mouseMoveTimer_->stop();
+    }
+}
+
+void JsobjectInterface::updateMouseScroll()
 {
 
 }
@@ -175,8 +229,6 @@ WebPage::WebPage(QObject *parent)
     , m_keyboardModifiers(Qt::NoModifier)
     , m_pressedButtons(Qt::NoButton)
     , m_openInNewTab(false)
-    , x_(0)
-    , y_(0)
 {
     //setNetworkAccessManager(BrowserApplication::networkAccessManager());
     //connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
@@ -195,9 +247,6 @@ WebPage::WebPage(QObject *parent)
     jscript_ = file2.readAll();
     file2.close();
 
-    mouseTimer_ = new QTimer(this);
-    connect(mouseTimer_, SIGNAL(timeout()), this, SLOT(updateMouse()));
-
     jsQObject_ = new JsobjectInterface(this);
 
     connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
@@ -207,14 +256,6 @@ WebPage::WebPage(QObject *parent)
 WebPage::~WebPage()
 {
     //delete jsQObject_;
-    //delete mouseTimer_;
-}
-
-void WebPage::moveMouse(int x, int y)
-{
-    x_ = x;
-    y_ = y;
-    mouseTimer_->start(10);
 }
 
 void WebPage::lefeMouseClicked()
@@ -222,7 +263,7 @@ void WebPage::lefeMouseClicked()
 
 }
 
-void WebPage::scrollMouse(int left, int right)
+void WebPage::scrollBar(int left, int right)
 {
     mainFrame()->scroll(left, right);
 }
@@ -230,38 +271,6 @@ void WebPage::scrollMouse(int left, int right)
 void WebPage::startJS(const QString &func)
 {
     mainFrame()->evaluateJavaScript(func);
-}
-
-void WebPage::updateMouse()
-{
-    QPoint p = QCursor::pos();
-    int x = p.x();
-    int y = p.y();
-
-    if(x > x_)
-    {
-        x = x - 1;
-    }
-    else if( x < x_)
-    {
-        x = x + 1;
-    }
-
-    if(y > y_)
-    {
-        y = y -1;
-    }
-    else if(y < y_)
-    {
-        y = y + 1;
-    }
-
-    QCursor::setPos(x, y);
-
-    if(x == x_ && y == y_)
-    {
-        mouseTimer_->stop();
-    }
 }
 
 void WebPage::addJavaScriptObject()
@@ -319,7 +328,7 @@ QPoint WebPage::scrollBar()
 WebView::WebView(QWidget* parent)
     : QWebView(parent)
     , m_progress(0)
-    , m_page(new WebPage(this))
+    , m_page(new WebPage(0))
 {
     setPage(m_page);
 

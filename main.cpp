@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
     w->show();
     int status = a.exec();
 
+    //qDebug() << w->myCookie()->save();
+
     delete w;
 
     qDebug() << status;

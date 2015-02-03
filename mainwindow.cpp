@@ -45,7 +45,22 @@ MainWindow::~MainWindow()
 {
     qDebug() << myCookie()->save();
     delete ui;
-    delete myCookie();
+    //delete myCookie();
+}
+
+QPoint MainWindow::viewPos()
+{
+    WebView* wv = MainWindow::Instance()->tabWidget()->currentWebView();
+    if(wv)
+    {
+        QPoint p(0, 0);
+        int window_x = wv->mapToGlobal(p).x();
+        int window_y = wv->mapToGlobal(p).y();
+
+        return QPoint(window_x, window_y);
+    }
+
+    return QPoint(0,0);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -60,7 +75,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    //v_->back();
+    t_->currentWebView()->back();
 }
 
 void MainWindow::on_actionHighlight_links_triggered(bool checked)
@@ -94,7 +109,7 @@ void MainWindow::on_actionMove_triggered()
 
     //p = this->mapToGlobal(p);
 
-    //QCursor::setPos(p);
+    QCursor::setPos(viewPos());
 }
 
 void MainWindow::on_actionMovetoweb_triggered()
@@ -165,7 +180,7 @@ void MainWindow::on_actionClearcookie_triggered()
 
 void MainWindow::on_actionScroll_triggered()
 {
-    t_->currentWebView()->webPage()->scrollMouse(1,1);
+    //t_->currentWebView()->webPage()->scrollMouse(1,1);
     t_->currentWebView()->webPage()->startJS("testpos()");
 }
 

@@ -110,12 +110,24 @@ public slots:
     void mbclick(QMap<QString, QVariant>& object);
     void mbroll(QMap<QString, QVariant>& object);
 
+    void updateMouseMove();
+    void updateMouseScroll();
+
 private:
     int m_signalEmited;
     QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
 
-    WebPage* page_;
+    QObject* page_;
+
+    QTimer* mouseMoveTimer_;
+    QTimer* mouseScrollTimer_;
+
+    int move_x_;
+    int move_y_;
+
+    int scroll_x_;
+    int scroll_y_;
 };
 
 class MyCookieJar : public QNetworkCookieJar
@@ -147,9 +159,8 @@ public:
     explicit WebPage(QObject *parent = 0);
     ~WebPage();
 
-    void moveMouse(int x, int y);
     void lefeMouseClicked();
-    void scrollMouse(int left, int right);
+    void scrollBar(int left, int right);
 
     void startJS(QString const& func);
     QPoint scrollBar();
@@ -166,8 +177,6 @@ protected:
     QString userAgentForUrl( const QUrl & url ) const;
 
 private slots:
-    void updateMouse();
-
     void addJavaScriptObject();
 
 private:
@@ -178,9 +187,6 @@ private:
     Qt::MouseButtons m_pressedButtons;
     bool m_openInNewTab;
     QUrl m_loadingUrl;
-    QTimer *mouseTimer_;
-    int x_;
-    int y_;
 
     QString jQuery;
     QString jscript_;

@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    virtual ~MainWindow();
 
     static MainWindow* Instance()
     {
@@ -43,6 +43,8 @@ public:
     {
         return t_;
     }
+
+    QPoint viewPos();
 
     QLabel* statusLabel()
     {
