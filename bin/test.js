@@ -1,18 +1,10 @@
-qt.jQuery(document).ready(function() {
-    //alert("hello");
-    try {
-        //jsQObject.sendtojs.connect(slotfrom);
-        //jsQObject.slotThatEmitsSignal();
-    }
-    catch(e) {
-        alert(e);
-    }
-});
-
-function slotfrom(object) {
-    var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
-    alert(objectString);
+/*
+try{
+	jsQObject.Sendtojs.connect(slotfrom);
+}catch(e){
+	alert(e);
 }
+*/
 
 function func() {
     try {
@@ -36,18 +28,42 @@ function dump_obj(myObject) {
   alert(s);
 }
 
+//factory_action define the flow
+
+function factory_action(object) {
+    var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
+    alert(objectString);
+	
+	if(object.signalsEmited == 1)
+	{
+		var top = object.top;
+		var left = object.left;
+		
+		var parms = {"top":top, "left":left};
+		
+		jsQObject.move(parms);
+	}
+}
+
 function testpos()
 {
     //alert("start");
     // > a[href='http://big.taobao.com/?spm=1.7388829.a214tlt.19']
-    var e = qt.jQuery("#OSC_Links");
+    /*
+	var e = qt.jQuery("#OSC_Links");
     var top = e.offset().top;
     var left = e.offset().left;
+	*/
+	
+	var e = document.getElementById("HomeJobPanel");
+	var top = getElementTop(e);
+	var left = getElementLeft(e);
 
     alert("top:" + top + ", left:" + left);
 
     var parms = {"top":top, "left":left};
-
+	
+	jsQObject.Sendtojs.connect(factory_action);
     jsQObject.scroll(parms);
 }
 

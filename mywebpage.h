@@ -165,6 +165,9 @@ public:
     void startJS(QString const& func);
     QPoint scrollBar();
 
+    int maxVerticalScrollBar();
+    int maxHorizontalScrollBar();
+
 signals:
     /*
     void loadLink(const QUrl & url);
@@ -175,6 +178,8 @@ signals:
 protected:
     bool acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type);//重写
     QString userAgentForUrl( const QUrl & url ) const;
+
+    int maxScrollBar(Qt::Orientation orientation);
 
 private slots:
     void addJavaScriptObject();

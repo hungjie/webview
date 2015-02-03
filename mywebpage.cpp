@@ -90,8 +90,14 @@ void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 //    QErrorMessage m(0);
 //    m.showMessage(QString::number(left) + "," + QString::number(top));
 //    m.exec();
+    scroll_x_ = left;
+    scroll_y_ = top;
 
-    qobject_cast<WebPage*>(page_)->scrollBar(left, top);
+    mouseScrollTimer_->start(20);
+
+    //qDebug() << scroll_x_ << "," << scroll_y_;
+
+    //qobject_cast<WebPage*>(page_)->scrollBar(scroll_x_, scroll_y_);
 }
 
 void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
@@ -101,10 +107,19 @@ void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::move(const QMap<QString, QVariant> &object)
 {
-    move_x_ = object["x"].toInt();
-    move_y_ = object["y"].toInt();
+    move_x_ = object["left"].toInt();
+    move_y_ = object["top"].toInt();
 
-    mouseMoveTimer_->start(50);
+    QPoint curBar = qobject_cast<WebPage*>(page_)->scrollBar();
+
+    move_x_ -= curBar.x();
+    move_y_ -= curBar.y();
+
+    QPoint vp = MainWindow::Instance()->viewPos();
+    move_x_ += vp.x();
+    move_y_ += vp.y();
+
+    mouseMoveTimer_->start(20);
 }
 
 void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
@@ -146,12 +161,74 @@ void JsobjectInterface::updateMouseMove()
     if(x == move_x_ && y == move_y_)
     {
         mouseMoveTimer_->stop();
+
+        this->m_signalEmited++;
+        this->m_emitSignal.clear();
+        this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
+        this->m_emitSignal["sender"] = QVariant("updateMouseMove");
+
+        this->m_emitSignal["top"] = QVariant(move_y_);
+        this->m_emitSignal["left"] = QVariant(move_x_);
+        emit Sendtojs(this->m_emitSignal);
     }
 }
 
 void JsobjectInterface::updateMouseScroll()
 {
+    int left = 0;
+    int top = 0;
 
+    WebPage* page = qobject_cast<WebPage*>(page_);
+    QPoint curBar = page->scrollBar();
+    left = scroll_x_ - curBar.x();
+    top = scroll_y_ - curBar.y();
+
+    if( page->maxVerticalScrollBar() == 0)
+    {
+        top = 0;
+    }
+
+    if( page->maxHorizontalScrollBar() == 0)
+    {
+        left = 0;
+    }
+
+    int left_action = 0;
+    int top_action = 0;
+    if(top > 0)
+    {
+        top_action++;
+    }
+    else if(top < 0)
+    {
+        top_action--;
+    }
+
+    if(top == 0)
+    {
+        if(left > 0)
+        {
+            left_action++;
+        }
+        else if(left < 0)
+        {
+            left_action--;
+        }
+        else
+        {
+            mouseScrollTimer_->stop();
+
+            this->m_signalEmited++;
+            this->m_emitSignal.clear();
+            this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
+            this->m_emitSignal["sender"] = QVariant("updateMouseScroll");
+            this->m_emitSignal["top"] = QVariant(scroll_y_);
+            this->m_emitSignal["left"] = QVariant(scroll_x_);
+            emit Sendtojs(this->m_emitSignal);
+        }
+    }
+
+    qobject_cast<WebPage*>(page_)->scrollBar(left_action, top_action);
 }
 
 MyCookieJar::MyCookieJar(QObject *parent)
@@ -323,6 +400,21 @@ QString WebPage::userAgentForUrl(const QUrl &url) const
 QPoint WebPage::scrollBar()
 {
     return mainFrame()->scrollPosition();
+}
+
+int WebPage::maxScrollBar(Qt::Orientation orientation)
+{
+    return mainFrame()->scrollBarMaximum(orientation);
+}
+
+int WebPage::maxVerticalScrollBar()
+{
+    return maxScrollBar(Qt::Vertical);
+}
+
+int WebPage::maxHorizontalScrollBar()
+{
+    return maxScrollBar(Qt::Horizontal);
 }
 
 WebView::WebView(QWidget* parent)
