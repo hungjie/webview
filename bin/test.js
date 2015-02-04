@@ -55,31 +55,17 @@ function scroll(object)
 {
 }
 
-function inputvalue(object)
+function timerinputvalue(object)
 {
 	this.object = object;
 	
-	this.action = function(){
-		//var value = object["value"];
-		var value = new Array("L","你");
-		var e = document.getElementById("kw");
-		var input = "";
-		
-		for(var i=0; i < value.length; i++){
-			input = input + value[i];
-			e.value = input;
-			
-			//sleep(5000);
-		}
+	this.action = function(){		
+		jsQObject.timerInput(object);
 	}
 }
 
 function switchtab(object)
 {
-}
-
-function sleep(d){
-	
 }
 
 function factory(action)
@@ -106,14 +92,21 @@ function factory_action(object) {
 		c.action();
 	}
 	else if(object.signalsEmited == 3)
-	{
-		var i = new inputvalue(object);
+	{		
+		object["cur_index"] = 0;
+		object["cur_input"] = "";
+		object["time"] = 1000;
+		object["input_array"] = jsQObject.get_search_input_array();
+		object["input_id"] = jsQObject.get_search_input_id();
+	
+		var i = new timerinputvalue(object);
 		i.action();
 	}
 }
 
 function start()
 {
+	//alert(globalvar);
     //alert("start");
     // > a[href='http://big.taobao.com/?spm=1.7388829.a214tlt.19']
     /*
@@ -133,6 +126,11 @@ function start()
 	
 	jsQObject.Sendtojs.connect(factory_action);
     jsQObject.scroll(parms);
+}
+
+function sleep(d)
+{
+	jsQObject.sleep(d);
 }
 
 function getElementLeft(element)
