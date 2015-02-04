@@ -8,7 +8,7 @@ QT       += core gui webkitwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = testwebview
+TARGET = webview
 TEMPLATE = app
 
 SOURCES += main.cpp\

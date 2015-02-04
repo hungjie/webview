@@ -6,6 +6,8 @@ try{
 }
 */
 
+var main_script = new array("first", "second");
+
 function func() {
     try {
         //var object = {intValue: 2};
@@ -30,22 +32,87 @@ function dump_obj(myObject) {
 
 //factory_action define the flow
 
+function lbclick(object)
+{
+	this.object = object;
+	this.action = function()
+	{
+		//alert("test");
+		var left = this.object.left;
+		var top = this.object.top;
+		
+		var parms = {"left":left, "top":top};
+		
+		jsQObject.lbclick(parms);
+	}
+}
+
+function move(object)
+{
+}
+
+function scroll(object)
+{
+}
+
+function inputvalue(object)
+{
+	this.object = object;
+	
+	this.action = function(){
+		//var value = object["value"];
+		var value = new Array("L","你");
+		var e = document.getElementById("kw");
+		var input = "";
+		
+		for(var i=0; i < value.length; i++){
+			input = input + value[i];
+			e.value = input;
+			
+			//sleep(5000);
+		}
+	}
+}
+
+function switchtab(object)
+{
+}
+
+function sleep(d){
+	
+}
+
+function factory(action)
+{
+}
+
 function factory_action(object) {
-    var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
-    alert(objectString);
+    //var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
+    //alert(objectString);
+	//dump_obj(object);
 	
 	if(object.signalsEmited == 1)
 	{
 		var top = object.top;
 		var left = object.left;
 		
-		var parms = {"top":top, "left":left};
+		var parms = {"top":top, "left":left+50};
 		
 		jsQObject.move(parms);
 	}
+	else if(object.signalsEmited == 2)
+	{
+		var c = new lbclick(object);
+		c.action();
+	}
+	else if(object.signalsEmited == 3)
+	{
+		var i = new inputvalue(object);
+		i.action();
+	}
 }
 
-function testpos()
+function start()
 {
     //alert("start");
     // > a[href='http://big.taobao.com/?spm=1.7388829.a214tlt.19']
@@ -55,7 +122,8 @@ function testpos()
     var left = e.offset().left;
 	*/
 	
-	var e = document.getElementById("HomeJobPanel");
+	//var e = document.getElementById("HomeJobPanel");
+	var e = document.getElementById("kw");
 	var top = getElementTop(e);
 	var left = getElementLeft(e);
 

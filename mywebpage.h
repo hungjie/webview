@@ -17,6 +17,12 @@
 #include <QTabWidget>
 #include <QTabBar>
 
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+
+#include <QStringList>
+
 class WebPage;
 class WebView;
 
@@ -102,7 +108,7 @@ signals:
 public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
-    void slotThatEmitsSignal();
+//    void slotThatEmitsSignal();
 
     void scroll(const QMap<QString, QVariant>& object);
     void lbclick(const QMap<QString, QVariant>& object);
@@ -113,8 +119,11 @@ public slots:
     void updateMouseMove();
     void updateMouseScroll();
 
+protected:
+    void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
+
 private:
-    int m_signalEmited;
+    static int m_signalEmited;
     QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
 
@@ -148,6 +157,7 @@ public:
 
     bool save();
     bool load();
+
 private:
 
 };

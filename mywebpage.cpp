@@ -21,6 +21,8 @@
 #define NOMINMAX
 #include "windows.h"
 
+int JsobjectInterface::m_signalEmited = 0;
+
 void MouseOperator::LBClick()
 {
     ::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
@@ -50,8 +52,6 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(0)
     , page_(parent)
 {
-    m_signalEmited = 0;
-
     mouseMoveTimer_ = new QTimer(this);
     connect(mouseMoveTimer_, SIGNAL(timeout()), this, SLOT(updateMouseMove()));
 
@@ -69,17 +69,6 @@ QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, Q
     qDebug() << "SampleQObject::slotThatReturns" << this->m_returnObject;
 
     return this->m_returnObject;
-}
-
-void JsobjectInterface::slotThatEmitsSignal()
-{
-    qDebug() << "SampleQObject::slotThatEmitsSignal";
-    this->m_signalEmited++;
-    this->m_emitSignal.clear();
-    this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
-    this->m_emitSignal["sender"] = QVariant("SampleQObject::slotThatEmitsSignal");
-    qDebug() << "SampleQObject::slotThatEmitsSignal" << this->m_emitSignal;
-    emit Sendtojs(this->m_emitSignal);
 }
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
@@ -102,7 +91,18 @@ void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
 {
+    int x = object["left"].toInt();
+    int y = object["top"].toInt();
 
+    MouseOperator op(x, y);
+
+    op.LBClick();
+
+    QMap<QString, QVariant> emitSignal;
+    emitSignal["top"] = QVariant(y);
+    emitSignal["left"] = QVariant(x);
+
+    emitToJs("lbclick", emitSignal);
 }
 
 void JsobjectInterface::move(const QMap<QString, QVariant> &object)
@@ -124,12 +124,24 @@ void JsobjectInterface::move(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
 {
+    int x = object["x"].toInt();
+    int y = object["y"].toInt();
 
+    MouseOperator op(x, y);
+
+    op.MBClick();
 }
 
 void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
 {
+    int x = object["x"].toInt();
+    int y = object["y"].toInt();
 
+    int ch = object["ch"].toInt();
+
+    MouseOperator op(x, y);
+
+    op.MBRoll(ch);
 }
 
 void JsobjectInterface::updateMouseMove()
@@ -162,14 +174,11 @@ void JsobjectInterface::updateMouseMove()
     {
         mouseMoveTimer_->stop();
 
-        this->m_signalEmited++;
-        this->m_emitSignal.clear();
-        this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
-        this->m_emitSignal["sender"] = QVariant("updateMouseMove");
+        QMap<QString, QVariant> emitSignal;
+        emitSignal["top"] = QVariant(move_y_);
+        emitSignal["left"] = QVariant(move_x_);
 
-        this->m_emitSignal["top"] = QVariant(move_y_);
-        this->m_emitSignal["left"] = QVariant(move_x_);
-        emit Sendtojs(this->m_emitSignal);
+        emitToJs("updateMouseMove", emitSignal);
     }
 }
 
@@ -183,34 +192,41 @@ void JsobjectInterface::updateMouseScroll()
     left = scroll_x_ - curBar.x();
     top = scroll_y_ - curBar.y();
 
-    if( page->maxVerticalScrollBar() == 0)
+    int scroll_vertical_max = page->maxVerticalScrollBar();
+    int scroll_horizontal_max = page->maxHorizontalScrollBar();
+
+    if( scroll_vertical_max == 0 )
     {
         top = 0;
     }
 
-    if( page->maxHorizontalScrollBar() == 0)
+    if( scroll_horizontal_max == 0 )
     {
         left = 0;
     }
 
     int left_action = 0;
     int top_action = 0;
-    if(top > 0)
+    if(top > 0 && scroll_vertical_max != curBar.y())
     {
         top_action++;
     }
-    else if(top < 0)
+    else if(top < 0 && 0 != curBar.y())
     {
         top_action--;
+    }
+    else
+    {
+        top = 0;
     }
 
     if(top == 0)
     {
-        if(left > 0)
+        if(left > 0 && scroll_horizontal_max != curBar.x())
         {
             left_action++;
         }
-        else if(left < 0)
+        else if(left < 0 && scroll_horizontal_max != 0)
         {
             left_action--;
         }
@@ -218,17 +234,31 @@ void JsobjectInterface::updateMouseScroll()
         {
             mouseScrollTimer_->stop();
 
-            this->m_signalEmited++;
-            this->m_emitSignal.clear();
-            this->m_emitSignal["signalsEmited"] = QVariant(this->m_signalEmited);
-            this->m_emitSignal["sender"] = QVariant("updateMouseScroll");
-            this->m_emitSignal["top"] = QVariant(scroll_y_);
-            this->m_emitSignal["left"] = QVariant(scroll_x_);
-            emit Sendtojs(this->m_emitSignal);
+            QMap<QString, QVariant> emitSignal;
+            emitSignal["top"] = QVariant(scroll_y_);
+            emitSignal["left"] = QVariant(scroll_x_);
+/*
+            QStringList list;
+            list << QString("first") << QString("second");
+
+            emitSignal["add"] = QVariant::fromValue(list);
+*/
+            emitToJs("updateMouseScroll", emitSignal);
         }
     }
 
     qobject_cast<WebPage*>(page_)->scrollBar(left_action, top_action);
+}
+
+void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
+{
+    this->m_emitSignal.clear();
+    this->m_emitSignal = object;
+
+    this->m_emitSignal["sender"] = QVariant(sender);
+    this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
+
+    emit Sendtojs(this->m_emitSignal);
 }
 
 MyCookieJar::MyCookieJar(QObject *parent)

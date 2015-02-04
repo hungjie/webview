@@ -181,7 +181,7 @@ void MainWindow::on_actionClearcookie_triggered()
 void MainWindow::on_actionScroll_triggered()
 {
     //t_->currentWebView()->webPage()->scrollMouse(1,1);
-    t_->currentWebView()->webPage()->startJS("testpos()");
+    t_->currentWebView()->webPage()->startJS("start()");
 }
 
 void MainWindow::on_actionStatus_triggered()
