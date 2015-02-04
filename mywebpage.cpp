@@ -14,6 +14,8 @@
 
 #include <QErrorMessage>
 
+#include <QWebElement>
+
 #include "mainwindow.h"
 
 //#include <QtWebEngineWidgets/QWebEnginePage>
@@ -57,6 +59,9 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
 
     mouseScrollTimer_ = new QTimer(this);
     connect(mouseScrollTimer_, SIGNAL(timeout()), this, SLOT(updateMouseScroll()));
+
+    inputTimer_ = new QTimer(this);
+    connect(inputTimer_, SIGNAL(timeout()), this, SLOT(updateTimerInput()));
 }
 
 QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, QVariant>& object)
@@ -69,6 +74,44 @@ QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, Q
     qDebug() << "SampleQObject::slotThatReturns" << this->m_returnObject;
 
     return this->m_returnObject;
+}
+
+void JsobjectInterface::sleep(QVariant const &object)
+{
+    int time = object.toInt();
+    QThread::msleep(time);
+}
+
+QVariant JsobjectInterface::get_search_input_array()
+{
+    QStringList list;
+    list << QString("L") << QString::fromLocal8Bit("o");
+
+    return QVariant::fromValue(list);
+}
+
+QVariant JsobjectInterface::get_search_input_id()
+{
+    return QVariant::fromValue(QString("kw"));
+}
+
+void JsobjectInterface::timerInput(const QMap<QString, QVariant> &object)
+{
+    m_emitSignal = object;
+
+    /*
+    int cur_index = object["cur_index"].toInt();
+    QStringList sl = object["input_array"].toStringList();
+
+    if(cur_index < sl.length())
+    {
+        --this->m_signalEmited;
+    }
+    */
+
+    int time = m_emitSignal["time"].toInt();
+
+    inputTimer_->start(time);
 }
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
@@ -130,6 +173,12 @@ void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
     MouseOperator op(x, y);
 
     op.MBClick();
+
+    QMap<QString, QVariant> emitSignal;
+    emitSignal["top"] = QVariant(y);
+    emitSignal["left"] = QVariant(x);
+
+    emitToJs("mbclick", emitSignal);
 }
 
 void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
@@ -142,6 +191,12 @@ void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
     MouseOperator op(x, y);
 
     op.MBRoll(ch);
+
+    QMap<QString, QVariant> emitSignal;
+    emitSignal["top"] = QVariant(y);
+    emitSignal["left"] = QVariant(x);
+
+    emitToJs("mbroll", emitSignal);
 }
 
 void JsobjectInterface::updateMouseMove()
@@ -248,6 +303,35 @@ void JsobjectInterface::updateMouseScroll()
     }
 
     qobject_cast<WebPage*>(page_)->scrollBar(left_action, top_action);
+}
+
+void JsobjectInterface::updateTimerInput()
+{
+    int cur_index = m_emitSignal["cur_index"].toInt();
+    QStringList sl = m_emitSignal["input_array"].toStringList();
+    QString id = m_emitSignal["input_id"].toString();
+
+    QString find = QString("input[id=%1]").arg(id);
+    QWebElement e = qobject_cast<WebPage*>(page_)->mainFrame()->findFirstElement(find);
+
+    QString input = m_emitSignal["input_input"].toString();
+
+    if(cur_index < sl.length())
+    {
+        input += sl[cur_index];
+        m_emitSignal["input_input"] = QVariant::fromValue(input);
+
+        e.setAttribute("value", input);
+
+        cur_index++;
+        m_emitSignal["cur_index"] = QVariant::fromValue(cur_index);
+
+        //qDebug() << input;
+
+        return;
+    }
+
+    emitToJs("updateTimerInput", m_emitSignal);
 }
 
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
@@ -386,6 +470,7 @@ void WebPage::addJavaScriptObject()
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
+    //mainFrame()->evaluateJavaScript(QString("var globalvar = 'hello';"));
     mainFrame()->evaluateJavaScript(jscript_);
     //mainFrame()->evaluateJavaScript(QString("func()"));
 }

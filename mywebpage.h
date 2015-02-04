@@ -95,6 +95,21 @@ class JsobjectInterface : public QObject
 public:
     explicit JsobjectInterface(QObject *parent = 0);
 
+    int move_x(){ return this->move_x_; }
+    void move_x(int x){ this->move_x_ = x; }
+
+    int move_y(){ return this->move_y_; }
+    void move_y(int y){ this->move_y_ = y; }
+
+    int scroll_x(){ return this->scroll_x_; }
+    void scroll_x(int x){ this->scroll_x_ = x; }
+
+    int scroll_y(){ return this->scroll_y_; }
+    void scroll_y(int y){ this->scroll_y_ = y; }
+
+    QMap<QString, QVariant> emitSignal(){ return this->m_emitSignal; }
+    void emitSignal(QMap<QString, QVariant> const& emitSig){ this->m_emitSignal = emitSig; }
+
 signals:
     void Sendtojs(QMap<QString, QVariant> object);
 
@@ -109,6 +124,11 @@ public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
 //    void slotThatEmitsSignal();
+    void sleep(const QVariant &object);
+    QVariant get_search_input_array();
+    QVariant get_search_input_id();
+
+    void timerInput(const QMap<QString, QVariant> &object);
 
     void scroll(const QMap<QString, QVariant>& object);
     void lbclick(const QMap<QString, QVariant>& object);
@@ -118,6 +138,7 @@ public slots:
 
     void updateMouseMove();
     void updateMouseScroll();
+    void updateTimerInput();
 
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
@@ -131,6 +152,7 @@ private:
 
     QTimer* mouseMoveTimer_;
     QTimer* mouseScrollTimer_;
+    QTimer* inputTimer_;
 
     int move_x_;
     int move_y_;
