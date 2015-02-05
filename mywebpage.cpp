@@ -116,6 +116,7 @@ void JsobjectInterface::timerInput(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 {
+    qDebug()<<"test";
     int left = object["left"].toInt();
     int top = object["top"].toInt();
 
@@ -127,7 +128,7 @@ void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 
     mouseScrollTimer_->start(20);
 
-    //qDebug() << scroll_x_ << "," << scroll_y_;
+    qDebug() << scroll_x_ << "," << scroll_y_;
 
     //qobject_cast<WebPage*>(page_)->scrollBar(scroll_x_, scroll_y_);
 }

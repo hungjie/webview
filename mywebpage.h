@@ -128,6 +128,7 @@ public slots:
     QVariant get_search_input_array();
     QVariant get_search_input_id();
 
+    //interface call for js
     void timerInput(const QMap<QString, QVariant> &object);
 
     void scroll(const QMap<QString, QVariant>& object);
@@ -135,6 +136,8 @@ public slots:
     void move(const QMap<QString, QVariant>& object);
     void mbclick(QMap<QString, QVariant>& object);
     void mbroll(QMap<QString, QVariant>& object);
+
+    //-----------------------
 
     void updateMouseMove();
     void updateMouseScroll();
