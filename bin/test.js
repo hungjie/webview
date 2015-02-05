@@ -41,7 +41,7 @@ function lbclick(object)
 		//var left = this.object.left;
 		//var top = this.object.top;
 		
-		var e = document.getElementById(object.id);
+		var e = document.getElementById(this.object.id);
 		var top = getElementTop(e);
 		var left = getElementLeft(e);
 		
@@ -56,7 +56,7 @@ function move(object)
 	this.object = object;
 	this.action = function()
 	{
-		var e = document.getElementById(object.id);
+		var e = document.getElementById(this.object.id);
 		var top = getElementTop(e);
 		var left = getElementLeft(e);
 		
@@ -71,9 +71,9 @@ function scroll(object)
 	this.object = object;
 	this.action = function()
 	{
-		var e = document.getElementById(object.id);
-		var sx = getElementTop(e);
-		var sy = getElementLeft(e);
+		var e = document.getElementById(this.object.id);
+		var sy = getElementTop(e);
+		var sx = getElementLeft(e);
 		
 		var parms = {"left":sx, "top":sy};
 		
@@ -88,7 +88,7 @@ function timerinputvalue(object)
 	this.action = function(){
 	alert("test");
 	return;
-		jsQObject.timerInput(object);
+		jsQObject.timerInput(this.object);
 	}
 }
 
@@ -98,31 +98,30 @@ function switchtab(object)
 
 function factory(action)
 {
-	dump_obj(main_script);
-	var o = NULL;
+	var o;
 	
 	if(main_script.length == 0 || main_script.length <= action)
 		return o;
 		
 	var parms = main_script[action];
 	
-	if(parms.action == "lbclick")
+	if(parms.func == "lbclick")
 	{
 		o = new lbclick(parms.parms);
 	}
-	else if(parms.action == "move")
+	else if(parms.func == "move")
 	{
 		o = new move(parms.parms);
 	}
-	else if(parms.action == "scroll")
+	else if(parms.func == "scroll")
 	{
 		o = new scroll(parms.parms);
 	}
-	else if(parms.action == "timerinputvalue")
+	else if(parms.func == "timerinputvalue")
 	{
 		o = new timerinputvalue(parms.parms);
 	}
-	else if(parms.action == "switchtab")
+	else if(parms.func == "switchtab")
 	{
 		o = new switchtab(parms.parms);
 	}
@@ -133,15 +132,16 @@ function factory(action)
 function factory_action(object) {
     //var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
     //alert(objectString);
-	dump_obj(object);
+	//dump_obj(object);
 	var step = object.signalsEmited;
 	var a = factory(step);
 	
-	if(a == NULL)
+	if(a == null || a == undefined)
+	{
 		return;
+	}
 		
 	a.action();
-	
 	/*
 	if(object.signalsEmited == 1)
 	{
