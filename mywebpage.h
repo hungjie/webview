@@ -143,6 +143,8 @@ public slots:
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
 
+    void nativeToGlobal(int& x, int& y);
+
 private:
     static int m_signalEmited;
     QMap<QString, QVariant> m_returnObject;

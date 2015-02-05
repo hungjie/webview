@@ -137,13 +137,20 @@ void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
     int x = object["left"].toInt();
     int y = object["top"].toInt();
 
-    MouseOperator op(x, y);
+    if(x != -1 && y != -1)
+        nativeToGlobal(x, y);
+    else
+    {
+        x = QCursor::pos().x();
+        y = QCursor::pos().y();
+    }
 
+    MouseOperator op(x, y);
     op.LBClick();
 
     QMap<QString, QVariant> emitSignal;
-    emitSignal["top"] = QVariant(y);
-    emitSignal["left"] = QVariant(x);
+//    emitSignal["top"] = QVariant(y);
+//    emitSignal["left"] = QVariant(x);
 
     emitToJs("lbclick", emitSignal);
 }
@@ -153,48 +160,57 @@ void JsobjectInterface::move(const QMap<QString, QVariant> &object)
     move_x_ = object["left"].toInt();
     move_y_ = object["top"].toInt();
 
-    QPoint curBar = qobject_cast<WebPage*>(page_)->scrollBar();
-
-    move_x_ -= curBar.x();
-    move_y_ -= curBar.y();
-
-    QPoint vp = MainWindow::Instance()->viewPos();
-    move_x_ += vp.x();
-    move_y_ += vp.y();
+    nativeToGlobal(move_x_, move_y_);
 
     mouseMoveTimer_->start(20);
 }
 
 void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
 {
-    int x = object["x"].toInt();
-    int y = object["y"].toInt();
+    int x = object["left"].toInt();
+    int y = object["top"].toInt();
+
+    if(x != -1 && y != -1)
+        nativeToGlobal(x, y);
+    else
+    {
+        x = QCursor::pos().x();
+        y = QCursor::pos().y();
+    }
 
     MouseOperator op(x, y);
 
     op.MBClick();
 
     QMap<QString, QVariant> emitSignal;
-    emitSignal["top"] = QVariant(y);
-    emitSignal["left"] = QVariant(x);
+    //emitSignal["top"] = QVariant(y);
+    //emitSignal["left"] = QVariant(x);
 
     emitToJs("mbclick", emitSignal);
 }
 
 void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
 {
-    int x = object["x"].toInt();
-    int y = object["y"].toInt();
+    int x = object["left"].toInt();
+    int y = object["top"].toInt();
 
     int ch = object["ch"].toInt();
+
+    if(x != -1 && y != -1)
+        nativeToGlobal(x, y);
+    else
+    {
+        x = QCursor::pos().x();
+        y = QCursor::pos().y();
+    }
 
     MouseOperator op(x, y);
 
     op.MBRoll(ch);
 
     QMap<QString, QVariant> emitSignal;
-    emitSignal["top"] = QVariant(y);
-    emitSignal["left"] = QVariant(x);
+    //emitSignal["top"] = QVariant(y);
+    //emitSignal["left"] = QVariant(x);
 
     emitToJs("mbroll", emitSignal);
 }
@@ -230,8 +246,8 @@ void JsobjectInterface::updateMouseMove()
         mouseMoveTimer_->stop();
 
         QMap<QString, QVariant> emitSignal;
-        emitSignal["top"] = QVariant(move_y_);
-        emitSignal["left"] = QVariant(move_x_);
+//        emitSignal["top"] = QVariant(move_y_);
+//        emitSignal["left"] = QVariant(move_x_);
 
         emitToJs("updateMouseMove", emitSignal);
     }
@@ -290,8 +306,8 @@ void JsobjectInterface::updateMouseScroll()
             mouseScrollTimer_->stop();
 
             QMap<QString, QVariant> emitSignal;
-            emitSignal["top"] = QVariant(scroll_y_);
-            emitSignal["left"] = QVariant(scroll_x_);
+//            emitSignal["scroll_y"] = QVariant(scroll_y_);
+//            emitSignal["scroll_x"] = QVariant(scroll_x_);
 /*
             QStringList list;
             list << QString("first") << QString("second");
@@ -343,6 +359,18 @@ void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVar
     this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
 
     emit Sendtojs(this->m_emitSignal);
+}
+
+void JsobjectInterface::nativeToGlobal(int &x, int &y)
+{
+    QPoint curBar = qobject_cast<WebPage*>(page_)->scrollBar();
+
+    x -= curBar.x();
+    y -= curBar.y();
+
+    QPoint vp = MainWindow::Instance()->viewPos();
+    x += vp.x();
+    y += vp.y();
 }
 
 MyCookieJar::MyCookieJar(QObject *parent)
