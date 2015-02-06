@@ -62,6 +62,9 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
 
     inputTimer_ = new QTimer(this);
     connect(inputTimer_, SIGNAL(timeout()), this, SLOT(updateTimerInput()));
+
+    sleepTimer_ = new QTimer(this);
+    connect(sleepTimer_, SIGNAL(timeout()), this, SLOT(updateSleep()));
 }
 
 QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, QVariant>& object)
@@ -79,7 +82,9 @@ QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, Q
 void JsobjectInterface::sleep(QVariant const &object)
 {
     int time = object.toInt();
-    QThread::msleep(time);
+    //QThread::msleep(time);
+
+    sleepTimer_->start(time);
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -216,6 +221,12 @@ void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
     emitToJs("mbroll", emitSignal);
 }
 
+QVariant JsobjectInterface::isLoadFinished()
+{
+    bool res = qobject_cast<WebPage*>(page_)->isLoadFinished();
+    return QVariant::fromValue(res);
+}
+
 void JsobjectInterface::updateMouseMove()
 {
     QPoint p = QCursor::pos();
@@ -331,12 +342,12 @@ void JsobjectInterface::updateTimerInput()
     QString find = QString("input[id=%1]").arg(id);
     QWebElement e = qobject_cast<WebPage*>(page_)->mainFrame()->findFirstElement(find);
 
-    QString input = m_emitSignal["input_input"].toString();
+    QString input = m_emitSignal["cur_input"].toString();
 
     if(cur_index < sl.length())
     {
         input += sl[cur_index];
-        m_emitSignal["input_input"] = QVariant::fromValue(input);
+        m_emitSignal["cur_input"] = QVariant::fromValue(input);
 
         e.setAttribute("value", input);
 
@@ -349,6 +360,11 @@ void JsobjectInterface::updateTimerInput()
     }
 
     emitToJs("updateTimerInput", m_emitSignal);
+}
+
+void JsobjectInterface::updateSleep()
+{
+    emitToJs("updateSleep", m_emitSignal);
 }
 
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
@@ -449,6 +465,7 @@ WebPage::WebPage(QObject *parent)
     , m_keyboardModifiers(Qt::NoModifier)
     , m_pressedButtons(Qt::NoButton)
     , m_openInNewTab(false)
+    , is_load_finished_(false)
 {
     //setNetworkAccessManager(BrowserApplication::networkAccessManager());
     //connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
@@ -466,6 +483,8 @@ WebPage::WebPage(QObject *parent)
     file2.open(QIODevice::ReadOnly);
     jscript_ = file2.readAll();
     file2.close();
+
+    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(loadFinished(bool)));
 
     jsQObject_ = new JsobjectInterface(this);
 
@@ -502,6 +521,11 @@ void WebPage::addJavaScriptObject()
     //mainFrame()->evaluateJavaScript(QString("var globalvar = 'hello';"));
     mainFrame()->evaluateJavaScript(jscript_);
     //mainFrame()->evaluateJavaScript(QString("func()"));
+}
+
+void WebPage::loadFinished(bool ok)
+{
+    is_load_finished_ = ok;
 }
 
 bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type)

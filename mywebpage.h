@@ -124,7 +124,6 @@ public slots:
     //供javascript调用的槽
     QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
 //    void slotThatEmitsSignal();
-    void sleep(const QVariant &object);
     QVariant get_search_input_array();
     QVariant get_search_input_id();
 
@@ -137,11 +136,16 @@ public slots:
     void mbclick(QMap<QString, QVariant>& object);
     void mbroll(QMap<QString, QVariant>& object);
 
+    void sleep(const QVariant &object);
+
+    QVariant isLoadFinished();
+
     //-----------------------
 
     void updateMouseMove();
     void updateMouseScroll();
     void updateTimerInput();
+    void updateSleep();
 
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
@@ -158,6 +162,8 @@ private:
     QTimer* mouseMoveTimer_;
     QTimer* mouseScrollTimer_;
     QTimer* inputTimer_;
+
+    QTimer* sleepTimer_;
 
     int move_x_;
     int move_y_;
@@ -205,6 +211,11 @@ public:
     int maxVerticalScrollBar();
     int maxHorizontalScrollBar();
 
+    bool isLoadFinished()
+    {
+        return is_load_finished_;
+    }
+
 signals:
     /*
     void loadLink(const QUrl & url);
@@ -220,6 +231,7 @@ protected:
 
 private slots:
     void addJavaScriptObject();
+    void loadFinished(bool ok);
 
 private:
     friend class WebView;
@@ -233,6 +245,8 @@ private:
     QString jQuery;
     QString jscript_;
     JsobjectInterface* jsQObject_;
+
+    bool is_load_finished_;
  };
 
 class WebView : public QWebView {

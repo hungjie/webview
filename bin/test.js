@@ -4,9 +4,14 @@ try{
 }catch(e){
 	alert(e);
 }
+object["cur_index"] = 0;
+		object["cur_input"] = "";
+		object["time"] = 1000;
+		object["input_array"] = jsQObject.get_search_input_array();
+		object["input_id"] = jsQObject.get_search_input_id();
 */
 
-var main_script = [{"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}},{"func":"lbclick","parms":{"id":"kw"}}];
+var main_script = [{"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}},{"func":"lbclick","parms":{"id":"kw"}},{"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}},{"func":"move","parms":{"id":"su", "offset":{"left":5, "top":5}}}, {"func":"lbclick","parms":{"id":"su", "offset":{"left":5, "top":5}}}];
 
 function func() {
     try {
@@ -41,13 +46,79 @@ function lbclick(object)
 		//var left = this.object.left;
 		//var top = this.object.top;
 		
-		var e = document.getElementById(this.object.id);
-		var top = getElementTop(e);
-		var left = getElementLeft(e);
+		var top = -1;
+		var left = -1;
 		
-		var parms = {"left":left, "top":top};
+		var e = document.getElementById(this.object.id);
+		if(e != undefined && e != null)
+		{
+			var top = getElementTop(e);
+			var left = getElementLeft(e);
+		}
+		
+		var offset_top = 0;
+		var offset_left = 0;
+		
+		if(this.object.offset != undefined)
+		{
+			offset_top = this.object.offset.top;
+			offset_left = this.object.offset.left;
+		}
+		var parms = {"left":left+offset_left, "top":top+offset_top};
 		
 		jsQObject.lbclick(parms);
+	}
+}
+
+function mbroll(object)
+{
+	this.object = object;
+	this.action = function()
+	{
+		var top = -1;
+		var left = -1;
+		
+		var e = document.getElementById(this.object.id);
+		if(e != undefined && e != null)
+		{
+			var top = getElementTop(e);
+			var left = getElementLeft(e);
+		}
+		
+		var ch = this.object.ch;
+		
+		var parms = {"left":left, "top":top, "ch":ch};
+		
+		jsQObject.mbroll(parms);
+	}
+}
+
+function mbclick(object)
+{
+	this.object = object;
+	this.action = function()
+	{		
+		var top = -1;
+		var left = -1;
+		
+		var e = document.getElementById(this.object.id);
+		if(e != undefined && e != null)
+		{
+			var top = getElementTop(e);
+			var left = getElementLeft(e);
+		}
+		
+		var offset_top = 0;
+		var offset_left = 0;
+		
+		if(this.object.offset != undefined)
+		{
+			offset_top = this.object.offset.top;
+			offset_left = this.object.offset.left;
+		}
+		var parms = {"left":left+offset_left, "top":top+offset_top};
+		
+		jsQObject.mbclick(parms);
 	}
 }
 
@@ -60,9 +131,17 @@ function move(object)
 		var top = getElementTop(e);
 		var left = getElementLeft(e);
 		
-		var parms = {"left":left, "top":top};
+		var offset_top = 0;
+		var offset_left = 0;
 		
-		jsQObject.Move(parms);
+		if(this.object.offset != undefined)
+		{
+			offset_top = this.object.offset.top;
+			offset_left = this.object.offset.left;
+		}
+		var parms = {"left":left+offset_left, "top":top+offset_top};
+		
+		jsQObject.move(parms);
 	}
 }
 
@@ -77,7 +156,7 @@ function scroll(object)
 		
 		var parms = {"left":sx, "top":sy};
 		
-		jsQObject.Scroll(parms);
+		jsQObject.scroll(parms);
 	}
 }
 
@@ -86,14 +165,26 @@ function timerinputvalue(object)
 	this.object = object;
 	
 	this.action = function(){
-	alert("test");
-	return;
 		jsQObject.timerInput(this.object);
 	}
 }
 
 function switchtab(object)
 {
+	this.object = object;
+	this.action = function(){
+		var index = this.object.index;
+		jsQObject.switchtab(index);
+	}
+}
+
+function sleep(object)
+{
+	this.object = object;
+	this.action = function(){
+		var mtime = this.object.mtime;
+		jsQObject.sleep(mtime);
+	}
 }
 
 function factory(action)
@@ -125,13 +216,15 @@ function factory(action)
 	{
 		o = new switchtab(parms.parms);
 	}
+	else if(parms.func == "sleep")
+	{
+		o = new sleep(parms.parms);
+	}
 	
 	return o;
 }
 
 function factory_action(object) {
-    //var objectString = object.sender + " has emited signal " + object.signalsEmited + " times.";
-    //alert(objectString);
 	//dump_obj(object);
 	var step = object.signalsEmited;
 	var a = factory(step);
@@ -142,33 +235,6 @@ function factory_action(object) {
 	}
 		
 	a.action();
-	/*
-	if(object.signalsEmited == 1)
-	{
-		var top = object.top;
-		var left = object.left;
-		
-		var parms = {"top":top, "left":left+50};
-		
-		jsQObject.move(parms);
-	}
-	else if(object.signalsEmited == 2)
-	{
-		var c = new lbclick(object);
-		c.action();
-	}
-	else if(object.signalsEmited == 3)
-	{		
-		object["cur_index"] = 0;
-		object["cur_input"] = "";
-		object["time"] = 1000;
-		object["input_array"] = jsQObject.get_search_input_array();
-		object["input_id"] = jsQObject.get_search_input_id();
-	
-		var i = new timerinputvalue(object);
-		i.action();
-	}
-	*/
 }
 
 function start()
@@ -183,29 +249,18 @@ function start()
 	*/
 	
 	//var e = document.getElementById("HomeJobPanel");
+	/*
+	var es = document.getElementsByClassName("pic-link");
+	alert(es.length);
+	alert(jsQObject.isLoadFinished());
+	return;
+	*/
 	
 	var step = 0;
 	jsQObject.Sendtojs.connect(factory_action);
 	
 	var parms = {"signalsEmited":step};
 	factory_action(parms);
-	
-	/*
-	var e = document.getElementById("kw");
-	var top = getElementTop(e);
-	var left = getElementLeft(e);
-
-    //alert("top:" + top + ", left:" + left);
-
-    var parms = {"top":top, "left":left};
-	
-    jsQObject.scroll(parms);
-	*/
-}
-
-function sleep(d)
-{
-	jsQObject.sleep(d);
 }
 
 function getElementLeft(element)
@@ -245,6 +300,7 @@ function getElementViewLeft(element){
 
     return actualLeft-elementScrollLeft;
 }
+
 function getElementViewTop(element){
     var actualTop = element.offsetTop;
     var current = element.offsetParent;
