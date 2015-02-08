@@ -65,10 +65,15 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
 
     sleepTimer_ = new QTimer(this);
     connect(sleepTimer_, SIGNAL(timeout()), this, SLOT(updateSleep()));
+
+    waitLoadFinishTimer_ = new QTimer(this);
+    connect(waitLoadFinishTimer_, SIGNAL(timeout()), this, SLOT(updateLoadFinish()));
 }
 
+/*
 QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, QVariant>& object)
 {
+
     qDebug() << "SampleQObject::slotThatReturns";
     this->m_returnObject.clear();
     this->m_returnObject.unite(object);
@@ -78,6 +83,7 @@ QMap<QString, QVariant> JsobjectInterface::slotThatReturns(const QMap<QString, Q
 
     return this->m_returnObject;
 }
+*/
 
 void JsobjectInterface::sleep(QVariant const &object)
 {
@@ -85,6 +91,40 @@ void JsobjectInterface::sleep(QVariant const &object)
     //QThread::msleep(time);
 
     sleepTimer_->start(time);
+}
+
+void JsobjectInterface::switchtab(const QVariant &object)
+{
+    int index = object.toInt();
+
+    TabWidget* tw = MainWindow::Instance()->tabWidget();
+
+    int count = tw->count();
+    if(index < 0 || index >= count)
+    {
+        //todo error
+        return;
+    }
+
+    WebView* v = tw->webView(index);
+
+    if(!v)
+    {
+        //todo error
+        return;
+    }
+
+    tw->setCurrentIndex(index);
+
+    v->webPage()->jsObjectInterface()->emitToJs("switchtab", m_emitSignal);
+}
+
+void JsobjectInterface::waitLoadFinished(const QMap<QString, QVariant> &object)
+{
+    loadFinishedTimes_ = 1;
+    m_emitSignal = object;
+
+    waitLoadFinishTimer_->start(1000);;
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -154,6 +194,8 @@ void JsobjectInterface::lbclick(const QMap<QString, QVariant> &object)
     MouseOperator op(x, y);
     op.LBClick();
 
+    qDebug()<<"lbclick:" <<x<<","<<y;
+
     QMap<QString, QVariant> emitSignal;
 //    emitSignal["top"] = QVariant(y);
 //    emitSignal["left"] = QVariant(x);
@@ -171,8 +213,10 @@ void JsobjectInterface::move(const QMap<QString, QVariant> &object)
     mouseMoveTimer_->start(20);
 }
 
-void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
+void JsobjectInterface::mbclick(const QMap<QString, QVariant> &object)
 {
+    qDebug() << "mbclick";
+
     int x = object["left"].toInt();
     int y = object["top"].toInt();
 
@@ -195,7 +239,7 @@ void JsobjectInterface::mbclick(QMap<QString, QVariant> &object)
     emitToJs("mbclick", emitSignal);
 }
 
-void JsobjectInterface::mbroll(QMap<QString, QVariant> &object)
+void JsobjectInterface::mbroll(const QMap<QString, QVariant> &object)
 {
     int x = object["left"].toInt();
     int y = object["top"].toInt();
@@ -260,7 +304,7 @@ void JsobjectInterface::updateMouseMove()
         QMap<QString, QVariant> emitSignal;
 //        emitSignal["top"] = QVariant(move_y_);
 //        emitSignal["left"] = QVariant(move_x_);
-
+        qDebug() << "emit mouse move fini";
         emitToJs("updateMouseMove", emitSignal);
     }
 }
@@ -359,12 +403,51 @@ void JsobjectInterface::updateTimerInput()
         return;
     }
 
+    qDebug() << "updateTimerInput" ;
+    inputTimer_->stop();
     emitToJs("updateTimerInput", m_emitSignal);
 }
 
 void JsobjectInterface::updateSleep()
 {
     emitToJs("updateSleep", m_emitSignal);
+}
+
+void JsobjectInterface::updateLoadFinish()
+{
+    int times = m_emitSignal["times"].toInt();
+    int index = m_emitSignal["tab_index"].toInt();
+
+    TabWidget* tw = MainWindow::Instance()->tabWidget();
+    WebView* v = tw->webView(index);
+
+    if(loadFinishedTimes_++ > times)
+    {
+        waitLoadFinishTimer_->stop();
+
+        if(!v || !v->webPage()->isLoadFinished())
+        {
+            // todo error
+            qDebug() << "error";
+            return;
+        }
+
+        emitToJs("updateLoadFinish", m_emitSignal);
+    }
+
+    if(!v)
+    {
+        waitLoadFinishTimer_->stop();
+        //todo error
+        qDebug() << "error";
+        return;
+    }
+
+    if(v->webPage()->isLoadFinished())
+    {
+        waitLoadFinishTimer_->stop();
+        emitToJs("updateLoadFinish", m_emitSignal);
+    }
 }
 
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
@@ -471,15 +554,17 @@ WebPage::WebPage(QObject *parent)
     //connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
     //        this, SLOT(handleUnsupportedContent(QNetworkReply*)));
 
+    /*
     QFile file;
     file.setFileName("jquery.min.js");
     file.open(QIODevice::ReadOnly);
     jQuery = file.readAll();
     jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
     file.close();
+    */
 
     QFile file2;
-    file2.setFileName("test.js");
+    file2.setFileName("script.js");
     file2.open(QIODevice::ReadOnly);
     jscript_ = file2.readAll();
     file2.close();
@@ -517,9 +602,8 @@ void WebPage::addJavaScriptObject()
     //mainFrame()->evaluateJavaScript(jQuery);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
-
-    //mainFrame()->evaluateJavaScript(QString("var globalvar = 'hello';"));
     mainFrame()->evaluateJavaScript(jscript_);
+    mainFrame()->evaluateJavaScript(QString("init()"));
     //mainFrame()->evaluateJavaScript(QString("func()"));
 }
 
@@ -825,37 +909,46 @@ void TabWidget::closeTab(int index)
     if (index < 0 || index >= count())
         return;
 
+    QWidget *webView = widget(index);
     removeTab(index);
 
-    /*
-    QWidget *webView = widget(index);
+//*
     if(webView)
         delete webView;
-    //*/
-/*
+//*/
+//*
     if(count() == 0)
     {
         newTab(true);
     }
-*/
+//*/
 }
 
 void TabWidget::currentChanged(int index)
 {
     WebView *webView = this->webView(index);
     if (!webView)
+    {
+        qDebug() << "no view found";
         return;
+    }
 
     webView->setFocus();
 }
 
 WebView *TabWidget::webView(int index) const
 {
+    if(index < 0)
+    {
+        return 0;
+    }
+
     QWidget *widget = this->widget(index);
     if (WebView *webView = qobject_cast<WebView*>(widget)) {
         return webView;
     } else {
         // optimization to delay creating the first webview
+        qDebug() << currentIndex() << "," << count();
         if (count() == 1) {
             TabWidget *that = const_cast<TabWidget*>(this);
             that->setUpdatesEnabled(false);
@@ -881,4 +974,19 @@ void TabWidget::loadUrlInCurrentTab(const QUrl &url)
         webView->loadUrl(url);
         webView->setFocus();
     }
+}
+
+
+void KeyBdOperateor::CtrlA()
+{
+    ::keybd_event(17,0,0,0);
+    ::keybd_event(65,0,0,0);
+    ::keybd_event(65,0,KEYEVENTF_KEYUP,0);
+    ::keybd_event(17,0,KEYEVENTF_KEYUP,0);
+}
+
+void KeyBdOperateor::Backspace()
+{
+    ::keybd_event(8,0,0,0);
+    ::keybd_event(8,0,KEYEVENTF_KEYUP,0);
 }

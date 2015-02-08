@@ -26,6 +26,14 @@
 class WebPage;
 class WebView;
 
+class KeyBdOperateor
+{
+public:
+
+    void CtrlA();
+    void Backspace();
+};
+
 class MouseOperator
 {
 public:
@@ -122,7 +130,7 @@ signals:
 
 public slots:
     //供javascript调用的槽
-    QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
+    //QMap<QString, QVariant> slotThatReturns(const QMap<QString, QVariant>& object);
 //    void slotThatEmitsSignal();
     QVariant get_search_input_array();
     QVariant get_search_input_id();
@@ -133,10 +141,13 @@ public slots:
     void scroll(const QMap<QString, QVariant>& object);
     void lbclick(const QMap<QString, QVariant>& object);
     void move(const QMap<QString, QVariant>& object);
-    void mbclick(QMap<QString, QVariant>& object);
-    void mbroll(QMap<QString, QVariant>& object);
+    void mbclick(const QMap<QString, QVariant>& object);
+    void mbroll(const QMap<QString, QVariant>& object);
 
     void sleep(const QVariant &object);
+    void switchtab(const QVariant & object);
+
+    void waitLoadFinished(const QMap<QString, QVariant>& object);
 
     QVariant isLoadFinished();
 
@@ -146,6 +157,7 @@ public slots:
     void updateMouseScroll();
     void updateTimerInput();
     void updateSleep();
+    void updateLoadFinish();
 
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
@@ -154,7 +166,7 @@ protected:
 
 private:
     static int m_signalEmited;
-    QMap<QString, QVariant> m_returnObject;
+    //QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
 
     QObject* page_;
@@ -165,11 +177,15 @@ private:
 
     QTimer* sleepTimer_;
 
+    QTimer* waitLoadFinishTimer_;
+
     int move_x_;
     int move_y_;
 
     int scroll_x_;
     int scroll_y_;
+
+    int loadFinishedTimes_;
 };
 
 class MyCookieJar : public QNetworkCookieJar
@@ -210,6 +226,11 @@ public:
 
     int maxVerticalScrollBar();
     int maxHorizontalScrollBar();
+
+    JsobjectInterface* jsObjectInterface()
+    {
+        return jsQObject_;
+    }
 
     bool isLoadFinished()
     {
