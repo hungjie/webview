@@ -16,10 +16,13 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
     , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
     , {"func":"move","parms":{"class":"toindex", "class_index":0 ,"offset":{"left":5, "top":5}}}
     , {"func":"mbclick","parms":{"class":"toindex", "class_index":0, "offset":{"left":5, "top":5}}}
+    , {"func":"sleep", "parms":{"mtime":1000}}
     , {"func":"waitLoadFinished","parms":{"times":5, "tab_index":1}}, {"func":"switchtab","parms":{"index":1}}
     , {"func":"move", "parms":{"id":"kw"}}, {"func":"lbclick", "parms":{}}
     , {"func":"timerinputvalue", "parms":{"cur_input":"", "time":1000, "input_array":["L","O", "V", "E"], "input_id":"kw"}}
-    , {"func":"move", "parms":{"id":"su"}}, {"func":"lbclick", "parms":{}}
+    , {"func":"move", "parms":{"id":"su"}}, {"func":"lbclick", "parms":{"id":"su", "offset":{"left":5, "top":5}}}
+    , {"func":"waitLoadFinished","parms":{"times":10, "tab_index":1}}
+    , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
 ];
 
 function func() {
@@ -119,6 +122,28 @@ function mbroll(object)
 		
 		jsQObject.mbroll(parms);
 	};
+}
+
+function whilembroll(object)
+{
+    this.object = object;
+    this.action = function()
+    {
+        var top = -1;
+        var left = -1;
+        
+        var e = document.getElementById(this.object.id);
+        if(e !== undefined && e !== null)
+        {
+                top = getElementTop(e);
+                left = getElementLeft(e);
+        }        
+        
+        var limit_times = this.object.limit_times;
+        var parms = {"left":left, "top":top, "limit_times":limit_times};
+        
+        jsQObject.whileMBRoll(parms);
+    };
 }
 
 function mbclick(object)
@@ -302,6 +327,10 @@ function factory(action)
         else if(parms.func === "mbroll")
         {
                 o = new mbroll(parms.parms);
+        }
+        else if(parms.func === "whilembroll")
+        {
+            o = new whilembroll(parms.parms);
         }
 	
 	//dump_obj(o);

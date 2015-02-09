@@ -27,7 +27,8 @@ int JsobjectInterface::m_signalEmited = 0;
 
 void MouseOperator::LBClick()
 {
-    ::mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
+    ::mouse_event(MOUSEEVENTF_LEFTDOWN, x_, y_, 0, 0);
+    ::mouse_event(MOUSEEVENTF_LEFTUP, x_, y_, 0, 0);
 }
 
 void MouseOperator::Move(int x, int y)
@@ -41,7 +42,8 @@ void MouseOperator::Move(int x, int y)
 //中键按下
 void MouseOperator::MBClick()
 {
-    ::mouse_event(MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP, x_, y_, 0, 0);
+    ::mouse_event(MOUSEEVENTF_MIDDLEDOWN, x_, y_, 0, 0);
+    ::mouse_event(MOUSEEVENTF_MIDDLEUP, x_, y_, 0, 0);
 }
 
 //中键滚动
@@ -68,6 +70,21 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
 
     waitLoadFinishTimer_ = new QTimer(this);
     connect(waitLoadFinishTimer_, SIGNAL(timeout()), this, SLOT(updateLoadFinish()));
+
+    whilembroll_ = new QTimer(this);
+    connect(whilembroll_, SIGNAL(timeout()), this, SLOT(whileMBRoll()));
+}
+
+JsobjectInterface::~JsobjectInterface()
+{
+    delete mouseMoveTimer_;
+    delete mouseScrollTimer_;
+    delete inputTimer_;
+
+    delete sleepTimer_;
+
+    delete waitLoadFinishTimer_;
+    delete whilembroll_;
 }
 
 /*
@@ -125,6 +142,15 @@ void JsobjectInterface::waitLoadFinished(const QMap<QString, QVariant> &object)
     m_emitSignal = object;
 
     waitLoadFinishTimer_->start(1000);;
+}
+
+void JsobjectInterface::whileMBRoll(const QMap<QString, QVariant> &object)
+{
+    this->m_emitSignal = object;
+
+    mbroll_times_ = 0;
+
+    whilembroll_->start(1000);
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -410,6 +436,7 @@ void JsobjectInterface::updateTimerInput()
 
 void JsobjectInterface::updateSleep()
 {
+    sleepTimer_->stop();
     emitToJs("updateSleep", m_emitSignal);
 }
 
@@ -450,6 +477,52 @@ void JsobjectInterface::updateLoadFinish()
     }
 }
 
+void JsobjectInterface::whileMBRoll()
+{
+    WebPage* page = qobject_cast<WebPage*>(page_);
+    QPoint curBar = page->scrollBar();
+    int scroll_vertical_max = page->maxVerticalScrollBar();
+
+    qDebug() << "scroll_vertical_max:" << scroll_vertical_max;
+
+    if(scroll_vertical_max == 0)
+    {
+        whilembroll_->stop();
+        emitToJs("whileMBRoll", m_emitSignal);
+
+        return;
+    }
+
+    int range = 50;
+    int ch = qrand() % range;
+    ch = 0 - ch;
+
+    int left = m_emitSignal["left"].toInt();
+    int top = m_emitSignal["top"].toInt();
+
+    if(left == -1 || top == -1)
+    {
+        left = QCursor::pos().x();
+        top = QCursor::pos().y();
+    }
+
+    if(curBar.y() == scroll_vertical_max)
+    {
+        ch = 0 - ch;
+    }
+
+    qDebug() << "ch:" << ch<<"left:"<<left<<"top:"<<top;
+
+    MouseOperator op(left, top);
+    op.MBRoll(ch);
+
+    if(mbroll_times_++ >= m_emitSignal["limit_times"].toInt())
+    {
+        whilembroll_->stop();
+        emitToJs("whileMBRoll", m_emitSignal);
+    }
+}
+
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
 {
     this->m_emitSignal.clear();
@@ -458,6 +531,7 @@ void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVar
     this->m_emitSignal["sender"] = QVariant(sender);
     this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
 
+    qDebug() << "emit sender:" << sender;
     emit Sendtojs(this->m_emitSignal);
 }
 
@@ -591,7 +665,7 @@ WebPage::WebPage(QObject *parent)
 
 WebPage::~WebPage()
 {
-    //delete jsQObject_;
+    delete jsQObject_;
 }
 
 void WebPage::lefeMouseClicked()
@@ -636,6 +710,7 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
 
     }
     */
+    is_load_finished_ = false;
     if (type == 0 && m_pressedButtons == Qt::MidButton) {
         WebView *webView;
         //bool selectNewTab = (m_keyboardModifiers & Qt::ShiftModifier);
@@ -646,6 +721,7 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
         webView->load(request);
         m_keyboardModifiers = Qt::NoModifier;
         m_pressedButtons = Qt::NoButton;
+
         return false;
     }
 
@@ -721,7 +797,7 @@ WebView::WebView(QWidget* parent)
 
 WebView::~WebView()
 {
-    //delete m_page;
+    delete m_page;
 }
 
 void WebView::contextMenuEvent(QContextMenuEvent *event)
@@ -783,6 +859,8 @@ void WebView::loadFinished()
         qWarning() << "Received finished signal while progress is still:" << progress()
                    << "Url:" << url();
     }
+
+    m_progress = 0;
 }
 
 void WebView::loadUrl(const QUrl &url)

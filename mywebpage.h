@@ -102,6 +102,7 @@ class JsobjectInterface : public QObject
     Q_OBJECT
 public:
     explicit JsobjectInterface(QObject *parent = 0);
+    ~JsobjectInterface();
 
     int move_x(){ return this->move_x_; }
     void move_x(int x){ this->move_x_ = x; }
@@ -149,15 +150,17 @@ public slots:
 
     void waitLoadFinished(const QMap<QString, QVariant>& object);
 
+    void whileMBRoll(const QMap<QString, QVariant>& object);
+
     QVariant isLoadFinished();
 
     //-----------------------
-
     void updateMouseMove();
     void updateMouseScroll();
     void updateTimerInput();
     void updateSleep();
     void updateLoadFinish();
+    void whileMBRoll();
 
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
@@ -179,6 +182,8 @@ private:
 
     QTimer* waitLoadFinishTimer_;
 
+    QTimer* whilembroll_;
+
     int move_x_;
     int move_y_;
 
@@ -186,6 +191,7 @@ private:
     int scroll_y_;
 
     int loadFinishedTimes_;
+    int mbroll_times_;
 };
 
 class MyCookieJar : public QNetworkCookieJar

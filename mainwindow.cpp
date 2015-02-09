@@ -52,6 +52,7 @@ MainWindow::~MainWindow()
 {
     qDebug() << myCookie()->save();
     delete ui;
+    delete t_;
     //delete myCookie();
 }
 
