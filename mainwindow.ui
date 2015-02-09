@@ -36,150 +36,20 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="horizonlayout" stretch="0,0,0">
+       <layout class="QHBoxLayout" name="horizonlayout" stretch="">
         <property name="spacing">
          <number>0</number>
         </property>
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
-        <item>
-         <widget class="QLineEdit" name="lineEdit"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>enter</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>back</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>727</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuTool">
-    <property name="title">
-     <string>tool</string>
-    </property>
-    <addaction name="actionHighlight_links"/>
-   </widget>
-   <widget class="QMenu" name="menuCursor">
-    <property name="title">
-     <string>cursor</string>
-    </property>
-    <addaction name="actionMove"/>
-    <addaction name="actionMovetoweb"/>
-    <addaction name="actionTimer"/>
-   </widget>
-   <widget class="QMenu" name="menuCookie">
-    <property name="title">
-     <string>cookie</string>
-    </property>
-    <addaction name="actionGetcookie"/>
-    <addaction name="actionSavecookie"/>
-    <addaction name="actionClearcookie"/>
-   </widget>
-   <widget class="QMenu" name="menuScroll">
-    <property name="title">
-     <string>scroll</string>
-    </property>
-    <addaction name="actionScroll"/>
-    <addaction name="actionStatus"/>
-   </widget>
-   <widget class="QMenu" name="menuTab">
-    <property name="title">
-     <string>tab</string>
-    </property>
-    <addaction name="actionSetfirst"/>
-    <addaction name="separator"/>
-    <addaction name="actionSetsecond"/>
-    <addaction name="actionSetthird"/>
-   </widget>
-   <addaction name="menuTool"/>
-   <addaction name="menuCursor"/>
-   <addaction name="menuCookie"/>
-   <addaction name="menuScroll"/>
-   <addaction name="menuTab"/>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionHighlight_links">
-   <property name="text">
-    <string>highlight links</string>
-   </property>
-  </action>
-  <action name="actionMove">
-   <property name="text">
-    <string>move</string>
-   </property>
-  </action>
-  <action name="actionMovetoweb">
-   <property name="text">
-    <string>movetoweb</string>
-   </property>
-  </action>
-  <action name="actionTimer">
-   <property name="text">
-    <string>timer</string>
-   </property>
-  </action>
-  <action name="actionGetcookie">
-   <property name="text">
-    <string>getcookie</string>
-   </property>
-  </action>
-  <action name="actionSavecookie">
-   <property name="text">
-    <string>savecookie</string>
-   </property>
-  </action>
-  <action name="actionClearcookie">
-   <property name="text">
-    <string>clearcookie</string>
-   </property>
-  </action>
-  <action name="actionScroll">
-   <property name="text">
-    <string>scroll</string>
-   </property>
-  </action>
-  <action name="actionStatus">
-   <property name="text">
-    <string>status</string>
-   </property>
-  </action>
-  <action name="actionSetfirst">
-   <property name="text">
-    <string>setfirst</string>
-   </property>
-  </action>
-  <action name="actionSetsecond">
-   <property name="text">
-    <string>setsecond</string>
-   </property>
-  </action>
-  <action name="actionSetthird">
-   <property name="text">
-    <string>setthird</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

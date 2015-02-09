@@ -200,6 +200,9 @@ public:
 
     void setCookies(const QList<QNetworkCookie>& cookieList);
 
+    void addCookie(QString name,QString value);
+    void changeCookie(QString name,QString value);
+
     void clearCookies();
 
     QList<QNetworkCookie> cookieByUrl(QString const& url);
@@ -221,7 +224,7 @@ public:
     void lefeMouseClicked();
     void scrollBar(int left, int right);
 
-    void startJS(QString const& func);
+    void excuteJS(QString const& func);
     QPoint scrollBar();
 
     int maxVerticalScrollBar();

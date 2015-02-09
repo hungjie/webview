@@ -9,8 +9,11 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     MainWindow* w = MainWindow::Instance();
-
     w->show();
+
+    QUrl url("http://www.baidu.com");
+    MainWindow::Instance()->tabWidget()->currentWebView()->loadUrl(url);
+
     int status = a.exec();
 
     //qDebug() << w->myCookie()->save();

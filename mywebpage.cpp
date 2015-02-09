@@ -493,6 +493,18 @@ void MyCookieJar::setCookies(const QList<QNetworkCookie>& cookieList)
     this->setAllCookies(cookieList);
 }
 
+void MyCookieJar::addCookie(QString name, QString value)
+{
+    QNetworkCookie cookie(name.toUtf8(),value.toUtf8());
+    this->insertCookie(cookie);
+}
+
+void MyCookieJar::changeCookie(QString name, QString value)
+{
+    QNetworkCookie cookie(name.toUtf8(),value.toUtf8());
+    this->updateCookie(cookie);
+}
+
 void MyCookieJar::clearCookies()
 {
     QList<QNetworkCookie> cookieList;
@@ -592,7 +604,7 @@ void WebPage::scrollBar(int left, int right)
     mainFrame()->scroll(left, right);
 }
 
-void WebPage::startJS(const QString &func)
+void WebPage::excuteJS(const QString &func)
 {
     mainFrame()->evaluateJavaScript(func);
 }

@@ -52,35 +52,11 @@ public:
     }
 
 private slots:
-    void on_pushButton_clicked();
+    //void on_pushButton_clicked();
 
-    void on_pushButton_2_clicked();
+    //void on_pushButton_2_clicked();
 
-    void on_actionHighlight_links_triggered(bool checked);
-
-    void on_actionMove_triggered();
-
-    void on_actionMovetoweb_triggered();
-
-    void on_actionTimer_triggered();
-
-    void on_actionGetcookie_triggered();
-
-    void on_actionSavecookie_triggered();
-
-    void on_actionClearcookie_triggered();
-
-    void on_actionScroll_triggered();
-
-    void on_actionStatus_triggered();
-
-    void on_actionSetfirst_triggered();
-
-    void on_actionSetsecond_triggered();
-
-    void on_actionSetthird_triggered();
-
-    void on_MainWindow_destroyed();
+    void checkWebFinished();
 
 protected:
     void mouseMoveEvent(QMouseEvent *e);
@@ -91,6 +67,9 @@ private:
     TabWidget* t_;
     QString jQuery;
     QLabel* msgLabel;
+
+    QTimer* timer_;
+    int timers_;
 
     static MainWindow* owner_;
     static MyCookieJar* mycookie_;
