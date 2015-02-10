@@ -23,6 +23,7 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
     , {"func":"move", "parms":{"id":"su"}}, {"func":"lbclick", "parms":{"id":"su", "offset":{"left":5, "top":5}}}
     , {"func":"waitLoadFinished","parms":{"times":10, "tab_index":1}}
     , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
+	, {"func":"exit", "parms":{"ret":0, "code":""}}
 ];
 
 function func() {
@@ -283,6 +284,14 @@ function sleep(object)
 	};
 }
 
+function exit(object)
+{
+	this.object = object;
+	this.action = function(){
+		jsQObject.exit(this.object);
+	};
+}
+
 function factory(action)
 {
 	var o;
@@ -332,6 +341,10 @@ function factory(action)
         {
             o = new whilembroll(parms.parms);
         }
+		else if(parms.func === "exit")
+		{
+			o = new exit(parms.parms);
+		}
 	
 	//dump_obj(o);
 	

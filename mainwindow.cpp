@@ -53,7 +53,10 @@ MainWindow::~MainWindow()
     qDebug() << myCookie()->save();
     delete ui;
     delete t_;
-    //delete myCookie();
+    delete timer_;
+    //delete mycookie_;
+    QWebSettings::globalSettings()->clearIconDatabase();
+    QWebSettings::globalSettings()->clearMemoryCaches();
 }
 
 QPoint MainWindow::viewPos()

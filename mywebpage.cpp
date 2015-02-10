@@ -1,5 +1,7 @@
 #include "mywebpage.h"
 
+#include <iostream>
+
 #include <QApplication>
 #include <QClipboard>
 #include <QNetworkRequest>
@@ -153,6 +155,16 @@ void JsobjectInterface::whileMBRoll(const QMap<QString, QVariant> &object)
     whilembroll_->start(1000);
 }
 
+void JsobjectInterface::exit(const QMap<QString, QVariant>& object)
+{
+    int ret = object["ret"].toInt();
+    QString code = object["code"].toString();
+
+    std::cout << code.toStdString();
+
+    QApplication::exit(ret);
+}
+
 QVariant JsobjectInterface::get_search_input_array()
 {
     QStringList list;
@@ -241,8 +253,6 @@ void JsobjectInterface::move(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::mbclick(const QMap<QString, QVariant> &object)
 {
-    qDebug() << "mbclick";
-
     int x = object["left"].toInt();
     int y = object["top"].toInt();
 
@@ -429,7 +439,6 @@ void JsobjectInterface::updateTimerInput()
         return;
     }
 
-    qDebug() << "updateTimerInput" ;
     inputTimer_->stop();
     emitToJs("updateTimerInput", m_emitSignal);
 }
@@ -460,6 +469,7 @@ void JsobjectInterface::updateLoadFinish()
         }
 
         emitToJs("updateLoadFinish", m_emitSignal);
+        return;
     }
 
     if(!v)
@@ -728,6 +738,9 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
     m_loadingUrl = request.url();
     emit loadingUrl(m_loadingUrl);
 
+    //QWebSettings::globalSettings()->clearIconDatabase();
+    //QWebSettings::globalSettings()->clearMemoryCaches();
+
     return QWebPage::acceptNavigationRequest(frame, request, type);
 }
 
@@ -780,6 +793,18 @@ WebView::WebView(QWidget* parent)
     settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     settings()->setAttribute(QWebSettings::PluginsEnabled, true);
 
+    QWebSettings::globalSettings()->setMaximumPagesInCache(0);
+    QWebSettings::globalSettings()->setObjectCacheCapacities(0, 0, 0);
+    /*
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, false);
+    QWebSettings::globalSettings()->setMaximumPagesInCache(0);
+    QWebSettings::globalSettings()->setObjectCacheCapacities(0, 0, 0);
+    QWebSettings::globalSettings()->setOfflineStorageDefaultQuota(0);
+    QWebSettings::globalSettings()->setOfflineWebApplicationCacheQuota(0);
+    QWebSettings::globalSettings()->clearIconDatabase();
+    QWebSettings::globalSettings()->clearMemoryCaches();
+    */
+
     page()->setForwardUnsupportedContent(true);
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 
@@ -822,9 +847,9 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
     QWebView::contextMenuEvent(event);
 }
 
+/*
 void WebView::wheelEvent(QWheelEvent *event)
 {
-    /*
     if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
         int numDegrees = event->delta() / 8;
         int numSteps = numDegrees / 15;
@@ -832,9 +857,9 @@ void WebView::wheelEvent(QWheelEvent *event)
         event->accept();
         return;
     }
-    */
     QWebView::wheelEvent(event);
 }
+*/
 
 void WebView::openLinkInNewTab()
 {
@@ -865,6 +890,9 @@ void WebView::loadFinished()
 
 void WebView::loadUrl(const QUrl &url)
 {
+    QWebSettings::globalSettings()->clearIconDatabase();
+    QWebSettings::globalSettings()->clearMemoryCaches();
+
     m_initialUrl = url;
 
     myCookie()->setCookiesFromUrl(myCookie()->mycookies(), url);
@@ -929,7 +957,6 @@ void WebView::linkClicked(QUrl const& url)
     loadUrl(url);
     //ui->lineEdit->setText(url.toString());
 }
-
 
 TabBar::TabBar(QWidget *parent)
     : QTabBar(parent)
@@ -999,10 +1026,10 @@ void TabWidget::closeTab(int index)
     if (index < 0 || index >= count())
         return;
 
-    QWidget *webView = widget(index);
+    //QWidget *webView = widget(index);
     removeTab(index);
 
-//*
+/*
     if(webView)
         delete webView;
 //*/
@@ -1065,7 +1092,6 @@ void TabWidget::loadUrlInCurrentTab(const QUrl &url)
         webView->setFocus();
     }
 }
-
 
 void KeyBdOperateor::CtrlA()
 {

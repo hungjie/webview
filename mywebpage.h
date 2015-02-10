@@ -152,6 +152,8 @@ public slots:
 
     void whileMBRoll(const QMap<QString, QVariant>& object);
 
+    void exit(const QMap<QString, QVariant>& object);
+
     QVariant isLoadFinished();
 
     //-----------------------
@@ -300,7 +302,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    //void wheelEvent(QWheelEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
 private slots:
