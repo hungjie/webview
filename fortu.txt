@@ -1,0 +1,57 @@
+程序以两个参数启动。
+
+参数1：页面地址，如http://www.taobao.com
+
+参数2：json值
+
+****必须如以下方式****
+var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}}
+    , {"func":"lbclick","parms":{"id":"kw"}}
+    , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
+    , {"func":"move","parms":{"class":"toindex", "class_index":0 ,"offset":{"left":5, "top":5}}}
+    , {"func":"mbclick","parms":{"class":"toindex", "class_index":0, "offset":{"left":5, "top":5}}}
+    , {"func":"sleep", "parms":{"mtime":1000}}
+    , {"func":"waitLoadFinished","parms":{"times":5, "tab_index":1}}, {"func":"switchtab","parms":{"index":1}}
+    , {"func":"move", "parms":{"id":"kw"}}, {"func":"lbclick", "parms":{}}
+    , {"func":"timerinputvalue", "parms":{"cur_input":"", "time":1000, "input_array":["L","O", "V", "E"], "input_id":"kw"}}
+    , {"func":"move", "parms":{"id":"su"}}, {"func":"lbclick", "parms":{"id":"su", "offset":{"left":5, "top":5}}}
+    , {"func":"waitLoadFinished","parms":{"times":10, "tab_index":1}}
+    , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
+	, {"func":"exit", "parms":{"ret":0, "code":""}}
+];
+
+此为页面操作脚本。现包含如上几个函数，还有几个操作函数即将补充。
+现有：
+1、scroll函数
+参数，id表示元素id。
+功能，如果页面有scroll bar，页面将滚动到该元素位置。
+
+2、move函数
+参数，id如上。
+功能，鼠标移动。
+
+3、lbclick函数
+参数，id如上，offset可选，表示偏移。
+功能，左键点击
+
+4、timerinputvalue函数
+参数，cur_input:当前输入的值，time：输入字符间隔，input_array：输入字符组，input_id:输入框id。
+功能，逐个输入字符到输入框中。
+
+5、mbclick函数
+参数，class：元素class，class_index:结果元素组中第几个元素，offset：偏移。
+功能，中健点击，用于新建窗口。
+
+6、sleep函数
+
+7、waitLoadFinished函数
+参数，times：总等待次数，1次1秒。tab_index：页面所在tab控件中的索引，默认0为开始页面，而后依次递增为新建标签页的索引。
+功能，等待标签页页面加载完成。
+
+8、whilembroll函数
+参数，id如上，在此意义不大。limit_times：滚动次数。隔500ms滚动一次。
+功能，鼠标中健滚动。
+
+9、exit函数
+参数，ret程序返回码。code程序错误信息。
+功能，程序退出。
