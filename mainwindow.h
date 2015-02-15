@@ -33,7 +33,7 @@ public:
         if(!mycookie_)
         {
             mycookie_ = new MyCookieJar();
-            qDebug() << mycookie_->load();
+            mycookie_->load();
         }
 
         return mycookie_;
@@ -49,6 +49,26 @@ public:
     QLabel* statusLabel()
     {
         return msgLabel;
+    }
+
+    QString main_script()
+    {
+        return main_script_;
+    }
+
+    void main_script(QString const& main_script)
+    {
+        main_script_ = main_script;
+    }
+
+    void load_addr(QString const& addr)
+    {
+        load_addr_ = addr;
+    }
+
+    QString load_addr()
+    {
+        return load_addr_;
     }
 
 private slots:
@@ -73,6 +93,9 @@ private:
 
     static MainWindow* owner_;
     static MyCookieJar* mycookie_;
+
+    QString main_script_;
+    QString load_addr_;
 };
 
 #endif // MAINWINDOW_H

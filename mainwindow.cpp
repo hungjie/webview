@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    qDebug() << myCookie()->save();
+    myCookie()->save();
     delete ui;
     delete t_;
     delete timer_;
@@ -103,6 +103,7 @@ void MainWindow::checkWebFinished()
     if(timers_++ == 100)
     {
         timer_->stop();
+        QApplication::exit(-1);
     }
 }
 

@@ -199,7 +199,7 @@ void JsobjectInterface::timerInput(const QMap<QString, QVariant> &object)
 
 void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 {
-    qDebug()<<"test";
+    //qDebug()<<"test";
     int left = object["left"].toInt();
     int top = object["top"].toInt();
 
@@ -699,7 +699,10 @@ void WebPage::addJavaScriptObject()
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
     mainFrame()->evaluateJavaScript(jscript_);
+    mainFrame()->evaluateJavaScript(MainWindow::Instance()->main_script());
+
     mainFrame()->evaluateJavaScript(QString("init()"));
+
     //mainFrame()->evaluateJavaScript(QString("func()"));
 }
 
