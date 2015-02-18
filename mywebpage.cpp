@@ -165,6 +165,11 @@ void JsobjectInterface::exit(const QMap<QString, QVariant>& object)
     QApplication::exit(ret);
 }
 
+void JsobjectInterface::ForfindElementId(const QMap<QString, QVariant> &object)
+{
+
+}
+
 QVariant JsobjectInterface::get_search_input_array()
 {
     QStringList list;

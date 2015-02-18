@@ -154,6 +154,8 @@ public slots:
 
     void exit(const QMap<QString, QVariant>& object);
 
+    void ForfindElementId(const QMap<QString, QVariant>& object);
+
     QVariant isLoadFinished();
 
     //-----------------------
