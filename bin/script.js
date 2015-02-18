@@ -11,6 +11,8 @@ object["cur_index"] = 0;
 		object["input_id"] = jsQObject.get_search_input_id();
 */
 
+/*********************************************************************************************************************
+//以下由参数传入
 var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}}
     , {"func":"lbclick","parms":{"id":"kw"}}
     , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
@@ -25,6 +27,7 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
     , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
 	, {"func":"exit", "parms":{"ret":0, "code":""}}
 ];
+***********************************************************************************************************************/
 
 function func() {
     try {
@@ -391,6 +394,18 @@ function start()
 	var step = 0;	
 	var parms = {"signalsEmited":step};
 	factory_action(parms);
+}
+
+function getElementsByIdAndClass(id, class_name, class_index)
+{
+	var e = document.getElementById(id);
+	var res = e.getElementsByClassName(class_name);
+	
+	if(res === undefined)
+		return res;
+	
+	var index = class_index === undefined ? 0 : class_index;
+	return res[index];
 }
 
 function getElementLeft(element)
