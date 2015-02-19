@@ -154,7 +154,7 @@ public slots:
 
     void exit(const QMap<QString, QVariant>& object);
 
-    void ForfindElementId(const QMap<QString, QVariant>& object);
+    void forfunc(const QMap<QString, QVariant>& object);
 
     QVariant isLoadFinished();
 
@@ -176,6 +176,8 @@ private:
     //QMap<QString, QVariant> m_returnObject;
     QMap<QString, QVariant> m_emitSignal;
 
+    static QMap<QString, QVariant> m_emitOption;
+
     QObject* page_;
 
     QTimer* mouseMoveTimer_;
@@ -196,6 +198,8 @@ private:
 
     int loadFinishedTimes_;
     int mbroll_times_;
+
+    bool emit_increasement_;
 };
 
 class MyCookieJar : public QNetworkCookieJar

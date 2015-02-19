@@ -57,6 +57,7 @@ void MouseOperator::MBRoll(int ch)
 JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(0)
     , page_(parent)
+    , emit_increasement_(true)
 {
     mouseMoveTimer_ = new QTimer(this);
     connect(mouseMoveTimer_, SIGNAL(timeout()), this, SLOT(updateMouseMove()));
@@ -165,9 +166,30 @@ void JsobjectInterface::exit(const QMap<QString, QVariant>& object)
     QApplication::exit(ret);
 }
 
-void JsobjectInterface::ForfindElementId(const QMap<QString, QVariant> &object)
+void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
 {
+    emit_increasement_ = false;
+    m_emitOption = object;
 
+    QMap<QString, QVariant> empty_option;
+
+    bool status = object["end_status"].toBool();
+    if(status)
+    {
+        m_emitOption = empty_option;
+        emit_increasement_ = true;
+    }
+
+    int limit_times = object["limit_times"].toInt();
+    int cur_times = object["cur_times"].toInt();
+    if(limit_times <= cur_times)
+    {
+        m_emitOption = empty_option;
+        emit_increasement_ = true;
+    }
+
+    QMap<QString, QVariant> o;
+    emitToJs("forfunc", o);
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -544,7 +566,14 @@ void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVar
     this->m_emitSignal = object;
 
     this->m_emitSignal["sender"] = QVariant(sender);
-    this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
+
+    if(this->emit_increasement_)
+        this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
+
+    if(this->m_emitOption.size() != 0)
+    {
+        this->m_emitSignal["option"] = this->m_emitOption;
+    }
 
     qDebug() << "emit sender:" << sender;
     emit Sendtojs(this->m_emitSignal);
