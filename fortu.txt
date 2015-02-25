@@ -18,6 +18,7 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
     , {"func":"waitLoadFinished","parms":{"times":10, "tab_index":1}}
     , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
 	, {"func":"exit", "parms":{"ret":0, "code":""}}
+	, {"func\":"forfunc", "parms":{"limit_times":5, "cur_times":0, "end_status":false,"end_condition":"foundelementid", "end_parms":{"id":"23","offset":{}}, "action_index":0, "actions":[{"func":"scroll", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, {"func":"move", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, \"func":"lbclick", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, {"func":"waitLoadFinished","parms":{"times":5, "tab_index":0}}]}}
 ];
 
 此为页面操作脚本。现包含如上几个函数，还有几个操作函数即将补充。
@@ -55,3 +56,7 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
 9、exit函数
 参数，ret程序返回码。code程序错误信息。
 功能，程序退出。
+
+10、forfunc函数
+参数，limit_times：总循环次数。cur_times：当前循环索引。end_status：结束状态，true将结束循环，用于程序内部。end_condition：循环判断结束函数名。end_parms：循环判断结束函数参数。action_index：循环当前活动索引。actions：所有循环函数。
+功能，循环，不支持嵌套循环。

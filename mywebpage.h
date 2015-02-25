@@ -155,6 +155,7 @@ public slots:
     void exit(const QMap<QString, QVariant>& object);
 
     void forfunc(const QMap<QString, QVariant>& object);
+    void saveoption(const QMap<QString, QVariant>& object);
 
     QVariant isLoadFinished();
 
@@ -199,7 +200,7 @@ private:
     int loadFinishedTimes_;
     int mbroll_times_;
 
-    bool emit_increasement_;
+    static bool emit_increasement_;
 };
 
 class MyCookieJar : public QNetworkCookieJar

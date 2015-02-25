@@ -26,24 +26,9 @@
  , {"func":"waitLoadFinished","parms":{"times":10, "tab_index":1}}
  , {"func":"whilembroll", "parms":{"id":"su", "limit_times":10}}
  , {"func":"exit", "parms":{"ret":0, "code":""}}
- , {"func":"forfunc", "parms":{"limit_times":5, "cur_times":0, "end_status":false,"end_condition":"foundelementid", "end_parms":{}, "action_index":0, "actions":[{"func":"move", "parms":{"id_class":{"id":"mainsrp-pager", "class":"J_Ajax num icon-tag"}}}, {"func":"lbclick", "parms":{"id_class":{"id":"mainsrp-pager", "class":"J_Ajax num icon-tag"}}}]}}
+ , {"func":"forfunc", "parms":{"limit_times":5, "cur_times":0, "end_status":false,"end_condition":"foundelementid", "end_parms":{"id":"","offset":{}}, "action_index":0, "actions":[{"func":"move", "parms":{"id_class":{"id":"mainsrp-pager", "class":"J_Ajax num icon-tag"}}}, {"func":"lbclick", "parms":{"id_class":{"id":"mainsrp-pager", "class":"J_Ajax num icon-tag"}}}]}}
  ];
  //***********************************************************************************************************************/
-
-function func() {
-    try {
-        //var object = {intValue: 2};
-        //var returnedObject = jsQObject.slotThatReturns(object);
-        //alert(returnedObject.stringValue);
-        dump_obj(jsQObject);
-        jsQObject.Sendtojs.connect(slotfrom);
-        jsQObject.slotThatEmitsSignal();
-    }
-    catch (e) {
-        alert(e);
-    }
-}
-
 function dump_obj(myObject) {
     var s = "";
     for (var property in myObject) {
@@ -52,13 +37,19 @@ function dump_obj(myObject) {
     alert(s);
 }
 
-//factory_action define the flow
+//factory_action define below
 
 function foundelementid(object) {
     this.object = object;
     this.action = function()
     {
+        var e = findElementByParms(this.object);
 
+        if (e === undefined || e === null)
+            return false;
+
+        alert("found");
+        return true;
     };
 }
 
@@ -66,14 +57,25 @@ function forfunc(object) {
     this.object = object;
     this.action = function()
     {
+        //dump_obj(this.object);
         if (this.object.limit_times <= this.object.cur_times)
         {
             this.object.end_status = true;
             jsQObject.forfunc(this.object);
             return;
         }
+        
+        if (this.object.action_index >= this.object.actions.length)
+        {
+            this.object.action_index = 0;
+            this.object.cur_times++;
+            //this.object.end_check = true;
+        }
+        
         if (this.object.action_index === 0)
         {
+            //this.object.end_check = false;
+            
             var c = do_factory(this.object.end_condition, this.object.end_parms);
             if (c === undefined || c === null)
             {
@@ -90,18 +92,13 @@ function forfunc(object) {
             }
         }
 
-        if (this.object.action_index >= this.object.actions.length)
-        {
-            this.object.action_index = 0;
-            this.object.cur_times++;
-        }
-
-        var parms2 = this.object.actions[this.object.action_index];
+        var cur_index = this.object.action_index;
+        this.object.action_index++;
+        jsQObject.forfunc(this.object);
+        
+        var parms2 = this.object.actions[cur_index];
         var a = do_factory(parms2.func, parms2.parms);
         a.action();
-        this.object.action_index++;
-
-        jsQObject.forfunc(this.object);
     };
 }
 
@@ -244,7 +241,7 @@ function scroll(object)
     this.object = object;
     this.action = function()
     {
-        var e = document.getElementById(this.object.id);
+        var e = findElementByParms(this.object);//document.getElementById(this.object.id);
         var sy = getElementTop(e);
         var sx = getElementLeft(e);
 
@@ -344,14 +341,14 @@ function do_factory(func, parms)
     {
         o = new exit(parms);
     }
-	else if(func === "forfunc")
-	{
-		o = new forfunc(parms);
-	}
-	else if(func === "foundelementid")
-	{
-		o = new foundelementid(parms);
-	}
+    else if (func === "forfunc")
+    {
+        o = new forfunc(parms);
+    }
+    else if (func === "foundelementid")
+    {
+        o = new foundelementid(parms);
+    }
 
     //dump_obj(o);
 
@@ -367,11 +364,11 @@ function factory(action, option)
 
     var parms = main_script[action];
 
-    if(option !== undefined)
+    if (option !== undefined)
     {
         parms.parms = option;
     }
-    
+
     return do_factory(parms.func, parms.parms);
 }
 
@@ -379,7 +376,7 @@ function factory_action(object) {
     //dump_obj(object);
     var step = object.signalsEmited;
     var option = object.option;
-    
+
     var a = factory(step, option);
 
     if (a === null || a === undefined)
@@ -441,7 +438,15 @@ function findElementByParms(parms) {
     {
         if (parms.id_class.id !== undefined && parms.id_class.class !== undefined)
         {
-            e = getElementsByIdAndClass(parms.id_class.id, parms.id_class.class);
+            if(parms.id_class.class_index !== undefined)
+            {
+                e = getElementsByIdAndClass(parms.id_class.id, parms.id_class.class, parms.id_class.class_index);
+            }
+            else
+            {
+                e = getElementsByIdAndClass(parms.id_class.id, parms.id_class.class);
+            }
+            
         }
     }
 
@@ -457,6 +462,14 @@ function getElementsByIdAndClass(id, class_name, class_index)
         return res;
 
     var index = class_index === undefined ? 0 : class_index;
+    if(class_index === -1)
+    {
+        index = res.length - 1;
+    }
+    
+    if(index < 0)
+        index = 0;
+    
     return res[index];
 }
 

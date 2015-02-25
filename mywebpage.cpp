@@ -27,6 +27,11 @@
 
 int JsobjectInterface::m_signalEmited = 0;
 
+QMap<QString, QVariant> empty_qmap;
+QMap<QString, QVariant> JsobjectInterface::m_emitOption = empty_qmap;
+
+bool JsobjectInterface::emit_increasement_ = true;
+
 void MouseOperator::LBClick()
 {
     ::mouse_event(MOUSEEVENTF_LEFTDOWN, x_, y_, 0, 0);
@@ -57,7 +62,6 @@ void MouseOperator::MBRoll(int ch)
 JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(0)
     , page_(parent)
-    , emit_increasement_(true)
 {
     mouseMoveTimer_ = new QTimer(this);
     connect(mouseMoveTimer_, SIGNAL(timeout()), this, SLOT(updateMouseMove()));
@@ -171,6 +175,19 @@ void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
     emit_increasement_ = false;
     m_emitOption = object;
 
+    /*
+    if(object.find("action_index") == object.end())
+    {
+        m_emitOption = empty_option;
+        emit_increasement_ = true;
+        QMap<QString, QVariant> o;
+        emitToJs("forfunc", o);
+        return;
+    }
+
+    m_emitOption["action_index"] = object["action_index"].toInt() + 1;
+    */
+
     QMap<QString, QVariant> empty_option;
 
     bool status = object["end_status"].toBool();
@@ -178,6 +195,9 @@ void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
     {
         m_emitOption = empty_option;
         emit_increasement_ = true;
+        QMap<QString, QVariant> o;
+        emitToJs("forfunc", o);
+        return;
     }
 
     int limit_times = object["limit_times"].toInt();
@@ -186,10 +206,16 @@ void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
     {
         m_emitOption = empty_option;
         emit_increasement_ = true;
-    }
 
-    QMap<QString, QVariant> o;
-    emitToJs("forfunc", o);
+        QMap<QString, QVariant> o;
+        emitToJs("forfunc", o);
+        return;
+    }
+}
+
+void JsobjectInterface::saveoption(const QMap<QString, QVariant> &object)
+{
+    m_emitOption = object;
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -569,6 +595,8 @@ void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVar
 
     if(this->emit_increasement_)
         this->m_emitSignal["signalsEmited"] = ++this->m_signalEmited;
+    else
+        this->m_emitSignal["signalsEmited"] = this->m_signalEmited;
 
     if(this->m_emitOption.size() != 0)
     {
