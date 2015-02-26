@@ -21,6 +21,10 @@ var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms"
 	, {"func\":"forfunc", "parms":{"limit_times":5, "cur_times":0, "end_status":false,"end_condition":"foundelementid", "end_parms":{"id":"23","offset":{}}, "action_index":0, "actions":[{"func":"scroll", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, {"func":"move", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, \"func":"lbclick", "parms":{"id_class":{"id":"page", "class":"n", "class_index":-1}}}, {"func":"waitLoadFinished","parms":{"times":5, "tab_index":0}}]}}
 ];
 
+***********************
+script.js需要跟程序放在一起,也可考虑与参数2一同传入。或者加在参数3。（未实现）
+***********************
+
 此为页面操作脚本。现包含如上几个函数，还有几个操作函数即将补充。
 现有：
 1、scroll函数
