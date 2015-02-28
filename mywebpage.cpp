@@ -499,7 +499,7 @@ void JsobjectInterface::updateTimerInput()
 void JsobjectInterface::updateSleep()
 {
     sleepTimer_->stop();
-    emitToJs("updateSleep", m_emitSignal);
+    emitToJs("updateSleep", empty_qmap);
 }
 
 void JsobjectInterface::updateLoadFinish()

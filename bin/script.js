@@ -244,8 +244,17 @@ function scroll(object)
         var e = findElementByParms(this.object);//document.getElementById(this.object.id);
         var sy = getElementTop(e);
         var sx = getElementLeft(e);
+		
+		var offset_top = 0;
+        var offset_left = 0;
 
-        var parms = {"left": sx, "top": sy};
+        if (this.object.offset !== undefined)
+        {
+            offset_top = this.object.offset.top;
+            offset_left = this.object.offset.left;
+        }
+
+        var parms = {"left": sx + offset_left, "top": sy + offset_top};
 
         jsQObject.scroll(parms);
     };
