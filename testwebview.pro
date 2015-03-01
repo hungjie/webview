@@ -13,13 +13,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mywebpage.cpp
+    mywebpage.cpp \
+    jsonencode.cpp
 
 HEADERS  += mainwindow.h \
-    mywebpage.h
+    mywebpage.h \
+    jsonencode.h
 
 FORMS    += mainwindow.ui
 
 OTHER_FILES +=
 
-RESOURCES +=
+RESOURCES += \
+    js.qrc

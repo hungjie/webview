@@ -29,6 +29,7 @@ int JsobjectInterface::m_signalEmited = 0;
 
 QMap<QString, QVariant> empty_qmap;
 QMap<QString, QVariant> JsobjectInterface::m_emitOption = empty_qmap;
+QMap<QString, QVariant> JsobjectInterface::m_randomOption = empty_qmap;
 
 bool JsobjectInterface::emit_increasement_ = true;
 
@@ -213,9 +214,15 @@ void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
     }
 }
 
-void JsobjectInterface::saveoption(const QMap<QString, QVariant> &object)
+QMap<QString, QVariant> JsobjectInterface::randomoption()
 {
-    m_emitOption = object;
+    return m_randomOption;
+}
+
+void JsobjectInterface::randomoption(const QMap<QString, QVariant> &object)
+{
+    qDebug
+    m_randomOption = object;
 }
 
 QVariant JsobjectInterface::get_search_input_array()
@@ -722,7 +729,7 @@ WebPage::WebPage(QObject *parent)
     */
 
     QFile file2;
-    file2.setFileName("script.js");
+    file2.setFileName(":/bin/script.js");
     file2.open(QIODevice::ReadOnly);
     jscript_ = file2.readAll();
     file2.close();

@@ -155,7 +155,8 @@ public slots:
     void exit(const QMap<QString, QVariant>& object);
 
     void forfunc(const QMap<QString, QVariant>& object);
-    void saveoption(const QMap<QString, QVariant>& object);
+    void randomoption(const QMap<QString, QVariant>& object);
+    QMap<QString, QVariant> randomoption();
 
     QVariant isLoadFinished();
 
@@ -178,6 +179,7 @@ private:
     QMap<QString, QVariant> m_emitSignal;
 
     static QMap<QString, QVariant> m_emitOption;
+    static QMap<QString, QVariant> m_randomOption;
 
     QObject* page_;
 

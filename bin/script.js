@@ -12,7 +12,7 @@
  */
 
 /*********************************************************************************************************************
- //以下由参数传�?
+ //以下由参数传�?
  var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}}
  , {"func":"lbclick","parms":{"id":"kw"}}
  , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
@@ -46,9 +46,35 @@ function foundelementid(object) {
         var e = findElementByParms(this.object);
 
         if (e === undefined || e === null)
-            return false;
+		{
+			var id = this.object.random_class_id.id;
+			var ee = document.getElementById(id);
+			var class_name = this.object.random_class_id.class;
+			var res = ee.getElementsByClassName(class_name);
+			var randomnum = 1;
+			if(res.length > 1)
+			{
+				randomnum = res.length;
+			}
 
-        alert("found");
+            alert(res.length);
+			
+			var index = parseInt((randomnum - 1)* Math.random());
+			
+			var index_res = res[index];
+
+            alert(index);
+
+            var sy = getElementTop(index_res);
+            var sx = getElementLeft(index_res);
+			
+			var parms = {"top":sy, "left":sx};
+			jsQObject.randomoption(parms);
+			
+            return false;
+		}
+
+        //alert("found");
         return true;
     };
 }
@@ -247,7 +273,7 @@ function scroll(object)
 		
 		var offset_top = 0;
         var offset_left = 0;
-
+		
         if (this.object.offset !== undefined)
         {
             offset_top = this.object.offset.top;
@@ -258,6 +284,54 @@ function scroll(object)
 
         jsQObject.scroll(parms);
     };
+}
+
+function randomscroll(object)
+{
+	this.object = object;
+	this.action = function()
+	{
+		var randomoption = jsQObject.randomoption();
+		var index_res = randomoption.res;
+		var sy = getElementTop(index_res);
+		var sx = getElementLeft(index_res);
+			
+		var parms = {"top":sy - 10, "left":sx - 10};
+
+        jsQObject.scroll(parms);
+	};
+}
+
+function randommove(object)
+{
+	this.object = object;
+	this.action = function()
+	{
+		var randomoption = jsQObject.randomoption();
+		var index_res = randomoption.res;
+		var sy = getElementTop(index_res);
+		var sx = getElementLeft(index_res);
+			
+		var parms = {"top":sy+10, "left":sx+10};
+
+        jsQObject.move(parms);
+	};
+}
+
+function randommbclick(object)
+{
+	this.object = object;
+	this.action = function()
+	{
+		var randomoption = jsQObject.randomoption();
+		var index_res = randomoption.res;
+		var sy = getElementTop(index_res);
+		var sx = getElementLeft(index_res);
+			
+		var parms = {"top":sy+10, "left":sx+10};
+
+        jsQObject.mbclick(parms);
+	};
 }
 
 function timerinputvalue(object)
@@ -358,6 +432,18 @@ function do_factory(func, parms)
     {
         o = new foundelementid(parms);
     }
+	else if (func === "randomscroll")
+	{
+		o = new randomscroll(parms);
+	}
+	else if (func === "randommove")
+	{
+		o = new randommove(parms);
+	}
+	else if (func === "randommbclick")
+	{
+		o = new randommbclick(parms);
+	}
 
     //dump_obj(o);
 
