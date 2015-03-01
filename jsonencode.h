@@ -15,6 +15,7 @@ public:
     QString toJsonString();
     void fromArg(QString const& arg);
 
+private:
     //QJsonObject object_;
     QJsonArray array_;
 };

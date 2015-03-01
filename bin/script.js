@@ -12,7 +12,7 @@
  */
 
 /*********************************************************************************************************************
- //以下由参数传�?
+ //以下由参数传�??
  var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}}
  , {"func":"lbclick","parms":{"id":"kw"}}
  , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
@@ -46,33 +46,34 @@ function foundelementid(object) {
         var e = findElementByParms(this.object);
 
         if (e === undefined || e === null)
-		{
-			var id = this.object.random_class_id.id;
-			var ee = document.getElementById(id);
-			var class_name = this.object.random_class_id.class;
-			var res = ee.getElementsByClassName(class_name);
-			var randomnum = 1;
-			if(res.length > 1)
-			{
-				randomnum = res.length;
-			}
+        {
+            var id = this.object.random_class_id.id;
+            var ee = document.getElementById(id);
+            var class_name = this.object.random_class_id.class;
+            var res = ee.getElementsByClassName(class_name);
+            var randomnum = 1;
+            if (res.length > 1)
+            {
+                randomnum = res.length;
+            }
 
-            alert(res.length);
-			
-			var index = parseInt((randomnum - 1)* Math.random());
-			
-			var index_res = res[index];
+            //alert(res.length);
 
-            alert(index);
+            var index = parseInt((randomnum - 1) * Math.random());
+
+            var index_res = res[index];
+
+            //alert(index);
 
             var sy = getElementTop(index_res);
             var sx = getElementLeft(index_res);
-			
-			var parms = {"top":sy, "left":sx};
-			jsQObject.randomoption(parms);
-			
+
+            var parms = {"top": sy, "left": sx};
+            
+            jsQObject.randomoption(parms);
+
             return false;
-		}
+        }
 
         //alert("found");
         return true;
@@ -83,25 +84,21 @@ function forfunc(object) {
     this.object = object;
     this.action = function()
     {
-        //dump_obj(this.object);
         if (this.object.limit_times <= this.object.cur_times)
         {
             this.object.end_status = true;
             jsQObject.forfunc(this.object);
             return;
         }
-        
+
         if (this.object.action_index >= this.object.actions.length)
         {
             this.object.action_index = 0;
             this.object.cur_times++;
-            //this.object.end_check = true;
         }
-        
+
         if (this.object.action_index === 0)
         {
-            //this.object.end_check = false;
-            
             var c = do_factory(this.object.end_condition, this.object.end_parms);
             if (c === undefined || c === null)
             {
@@ -121,8 +118,9 @@ function forfunc(object) {
         var cur_index = this.object.action_index;
         this.object.action_index++;
         jsQObject.forfunc(this.object);
-        
+
         var parms2 = this.object.actions[cur_index];
+        
         var a = do_factory(parms2.func, parms2.parms);
         a.action();
     };
@@ -270,10 +268,10 @@ function scroll(object)
         var e = findElementByParms(this.object);//document.getElementById(this.object.id);
         var sy = getElementTop(e);
         var sx = getElementLeft(e);
-		
-		var offset_top = 0;
+
+        var offset_top = 0;
         var offset_left = 0;
-		
+
         if (this.object.offset !== undefined)
         {
             offset_top = this.object.offset.top;
@@ -281,57 +279,49 @@ function scroll(object)
         }
 
         var parms = {"left": sx + offset_left, "top": sy + offset_top};
-
+        
         jsQObject.scroll(parms);
     };
 }
 
 function randomscroll(object)
 {
-	this.object = object;
-	this.action = function()
-	{
-		var randomoption = jsQObject.randomoption();
-		var index_res = randomoption.res;
-		var sy = getElementTop(index_res);
-		var sx = getElementLeft(index_res);
-			
-		var parms = {"top":sy - 10, "left":sx - 10};
+    this.object = object;
+    this.action = function()
+    {
+        var randomoption = jsQObject.randomoption();      
 
+        var parms = {"top": randomoption.top - 100, "left": randomoption.left - 100};
+        
         jsQObject.scroll(parms);
-	};
+    };
 }
 
 function randommove(object)
 {
-	this.object = object;
-	this.action = function()
-	{
-		var randomoption = jsQObject.randomoption();
-		var index_res = randomoption.res;
-		var sy = getElementTop(index_res);
-		var sx = getElementLeft(index_res);
-			
-		var parms = {"top":sy+10, "left":sx+10};
+    this.object = object;
+    this.action = function()
+    {
+        var randomoption = jsQObject.randomoption();
+        return;
+
+        var parms = {"top": randomoption.top + 10, "left": randomoption.left + 10};
 
         jsQObject.move(parms);
-	};
+    };
 }
 
 function randommbclick(object)
 {
-	this.object = object;
-	this.action = function()
-	{
-		var randomoption = jsQObject.randomoption();
-		var index_res = randomoption.res;
-		var sy = getElementTop(index_res);
-		var sx = getElementLeft(index_res);
-			
-		var parms = {"top":sy+10, "left":sx+10};
+    this.object = object;
+    this.action = function()
+    {
+        var randomoption = jsQObject.randomoption();
 
+        var parms = {"top": randomoption.top + 10, "left": randomoption.left + 10};
+        
         jsQObject.mbclick(parms);
-	};
+    };
 }
 
 function timerinputvalue(object)
@@ -432,18 +422,18 @@ function do_factory(func, parms)
     {
         o = new foundelementid(parms);
     }
-	else if (func === "randomscroll")
-	{
-		o = new randomscroll(parms);
-	}
-	else if (func === "randommove")
-	{
-		o = new randommove(parms);
-	}
-	else if (func === "randommbclick")
-	{
-		o = new randommbclick(parms);
-	}
+    else if (func === "randomscroll")
+    {
+        o = new randomscroll(parms);
+    }
+    else if (func === "randommove")
+    {
+        o = new randommove(parms);
+    }
+    else if (func === "randommbclick")
+    {
+        o = new randommbclick(parms);
+    }
 
     //dump_obj(o);
 
@@ -533,7 +523,7 @@ function findElementByParms(parms) {
     {
         if (parms.id_class.id !== undefined && parms.id_class.class !== undefined)
         {
-            if(parms.id_class.class_index !== undefined)
+            if (parms.id_class.class_index !== undefined)
             {
                 e = getElementsByIdAndClass(parms.id_class.id, parms.id_class.class, parms.id_class.class_index);
             }
@@ -541,7 +531,7 @@ function findElementByParms(parms) {
             {
                 e = getElementsByIdAndClass(parms.id_class.id, parms.id_class.class);
             }
-            
+
         }
     }
 
@@ -557,14 +547,14 @@ function getElementsByIdAndClass(id, class_name, class_index)
         return res;
 
     var index = class_index === undefined ? 0 : class_index;
-    if(class_index === -1)
+    if (class_index === -1)
     {
         index = res.length - 1;
     }
-    
-    if(index < 0)
+
+    if (index < 0)
         index = 0;
-    
+
     return res[index];
 }
 

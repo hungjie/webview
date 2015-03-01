@@ -216,12 +216,13 @@ void JsobjectInterface::forfunc(const QMap<QString, QVariant> &object)
 
 QMap<QString, QVariant> JsobjectInterface::randomoption()
 {
+    qDebug() <<"randomoption:"<< m_randomOption.size();
     return m_randomOption;
 }
 
 void JsobjectInterface::randomoption(const QMap<QString, QVariant> &object)
 {
-    qDebug
+    qDebug() <<"randomoption()"<< object.size();
     m_randomOption = object;
 }
 
@@ -271,7 +272,7 @@ void JsobjectInterface::scroll(const QMap<QString, QVariant> &object)
 
     mouseScrollTimer_->start(20);
 
-    qDebug() << scroll_x_ << "," << scroll_y_;
+    qDebug() << "updateMouseScroll:" << scroll_x_ << "," << scroll_y_;
 
     //qobject_cast<WebPage*>(page_)->scrollBar(scroll_x_, scroll_y_);
 }
@@ -467,6 +468,7 @@ void JsobjectInterface::updateMouseScroll()
             emitSignal["add"] = QVariant::fromValue(list);
 */
             emitToJs("updateMouseScroll", emitSignal);
+            return;
         }
     }
 
@@ -1137,7 +1139,7 @@ WebView *TabWidget::webView(int index) const
         return webView;
     } else {
         // optimization to delay creating the first webview
-        qDebug() << currentIndex() << "," << count();
+        qDebug() << "webView:" << currentIndex() << "," << count();
         if (count() == 1) {
             TabWidget *that = const_cast<TabWidget*>(this);
             that->setUpdatesEnabled(false);
