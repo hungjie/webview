@@ -90,6 +90,12 @@ bool JsonEncode::parser(const QString &arg)
     waitLoadFinished5.insert("parms", parms5);
     array_.push_back(waitLoadFinished5);
 
+    QJsonObject actionsleepadd = generateObject("sleep");
+    QJsonObject actionsleep1parmsadd;
+    actionsleep1parmsadd.insert("mtime", 2000);
+    actionsleepadd.insert("parms", actionsleep1parmsadd);
+    array_.push_back(actionsleepadd);
+
     QJsonObject forfunc6 = generateObject("forfunc");
     QJsonObject parms6;
     parms6.insert("limit_times", 5);

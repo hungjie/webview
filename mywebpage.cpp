@@ -368,6 +368,16 @@ QVariant JsobjectInterface::isLoadFinished()
     return QVariant::fromValue(res);
 }
 
+void JsobjectInterface::retry()
+{
+    emitToJs("retry", empty_qmap);
+}
+
+void JsobjectInterface::testlog(const QVariant &log)
+{
+    qDebug() << "testlog:" << log.toString();
+}
+
 void JsobjectInterface::updateMouseMove()
 {
     QPoint p = QCursor::pos();
@@ -716,6 +726,8 @@ WebPage::WebPage(QObject *parent)
     , m_pressedButtons(Qt::NoButton)
     , m_openInNewTab(false)
     , is_load_finished_(false)
+    , is_added_(false)
+    , jsQObject_(0)
 {
     //setNetworkAccessManager(BrowserApplication::networkAccessManager());
     //connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
@@ -730,15 +742,15 @@ WebPage::WebPage(QObject *parent)
     file.close();
     */
 
+    /*
     QFile file2;
     file2.setFileName(":/bin/script.js");
     file2.open(QIODevice::ReadOnly);
     jscript_ = file2.readAll();
     file2.close();
+    */
 
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(loadFinished(bool)));
-
-    jsQObject_ = new JsobjectInterface(this);
 
     connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             this, SLOT(addJavaScriptObject()));
@@ -746,7 +758,7 @@ WebPage::WebPage(QObject *parent)
 
 WebPage::~WebPage()
 {
-    delete jsQObject_;
+    //delete jsQObject_;
 }
 
 void WebPage::lefeMouseClicked()
@@ -767,12 +779,22 @@ void WebPage::excuteJS(const QString &func)
 void WebPage::addJavaScriptObject()
 {
     //mainFrame()->evaluateJavaScript(jQuery);
+    qDebug() << "addJavaScriptObject";
+
+    jsQObject_ = new JsobjectInterface(this);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
-    mainFrame()->evaluateJavaScript(jscript_);
+
     mainFrame()->evaluateJavaScript(MainWindow::Instance()->main_script());
 
+    mainFrame()->evaluateJavaScript(MainWindow::Instance()->js_script());
+
     mainFrame()->evaluateJavaScript(QString("init()"));
+
+    if(!is_added_)
+    {
+        is_added_ = true;
+    }
 
     //mainFrame()->evaluateJavaScript(QString("func()"));
 }
@@ -809,11 +831,19 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
         return false;
     }
 
+    if(type == NavigationTypeFormSubmitted || type == NavigationTypeFormResubmitted)
+    {
+        //QWebSettings::globalSettings()->clearIconDatabase();
+        //QWebSettings::globalSettings()->clearMemoryCaches();
+        //MainWindow::Instance()->tabWidget()->currentWebView()->load(request);
+        //m_loadingUrl = request.url();
+        //emit loadingUrl(m_loadingUrl);
+
+        //return false;
+    }
+
     m_loadingUrl = request.url();
     emit loadingUrl(m_loadingUrl);
-
-    //QWebSettings::globalSettings()->clearIconDatabase();
-    //QWebSettings::globalSettings()->clearMemoryCaches();
 
     return QWebPage::acceptNavigationRequest(frame, request, type);
 }
@@ -964,6 +994,7 @@ void WebView::loadFinished()
 
 void WebView::loadUrl(const QUrl &url)
 {
+    qDebug() << "loadUrl";
     QWebSettings::globalSettings()->clearIconDatabase();
     QWebSettings::globalSettings()->clearMemoryCaches();
 

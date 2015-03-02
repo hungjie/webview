@@ -38,52 +38,73 @@ function dump_obj(myObject) {
 }
 
 //factory_action define below
+window.onload = function() { alert(document.getElementsByClassName("pic-box-inner").length);};
+
+function findRandomelement(object)
+{
+    alert(document.getElementsByClassName("pic-box-inner").length);
+    
+    var id = object.random_class_id.id.toString();
+    var ee = document.getElementById(id);
+    var class_name = object.random_class_id.class.toString();
+
+    if (ee === undefined || ee === null)
+    {
+        jsQObject.testlog("ee error");
+    }
+
+    jsQObject.testlog("before getElementsByClassName:" + class_name);
+    var res = document.getElementsByClassName(class_name);
+    jsQObject.testlog("after getElementsByClassName:" + res.length);
+
+    var randomnum = 1;
+
+    if (res.length > 1)
+    {
+        randomnum = res.length;
+    }
+
+    var index = parseInt((randomnum - 1) * Math.random());
+
+    var index_res = res[index];
+
+    var sy = getElementTop(index_res);
+    var sx = getElementLeft(index_res);
+
+    var parms = {"top": sy, "left": sx};
+
+    jsQObject.randomoption(parms);
+}
 
 function foundelementid(object) {
     this.object = object;
     this.action = function()
     {
+        jsQObject.testlog("foundelementid");
         var e = findElementByParms(this.object);
 
         if (e === undefined || e === null)
         {
-            var id = this.object.random_class_id.id;
-            var ee = document.getElementById(id);
-            var class_name = this.object.random_class_id.class;
-            var res = ee.getElementsByClassName(class_name);
-            var randomnum = 1;
-            if (res.length > 1)
-            {
-                randomnum = res.length;
-            }
-
-            //alert(res.length);
-
-            var index = parseInt((randomnum - 1) * Math.random());
-
-            var index_res = res[index];
-
-            //alert(index);
-
-            var sy = getElementTop(index_res);
-            var sx = getElementLeft(index_res);
-
-            var parms = {"top": sy, "left": sx};
+            findRandomelement(this.object);
             
-            jsQObject.randomoption(parms);
+            jsQObject.testlog("eundefined");
 
             return false;
         }
 
-        //alert("found");
+        alert("found");
         return true;
     };
 }
+
+var testcound = 0;
 
 function forfunc(object) {
     this.object = object;
     this.action = function()
     {
+        jsQObject.testlog("testcount:" + (testcound++).toString());
+
         if (this.object.limit_times <= this.object.cur_times)
         {
             this.object.end_status = true;
@@ -107,21 +128,37 @@ function forfunc(object) {
                 return;
             }
 
-            if (c.action() === true)
+            var actionstatus = -1;
+            actionstatus = c.action();
+
+            if (actionstatus === true)
             {
                 this.object.end_status = true;
                 jsQObject.forfunc(this.object);
                 return;
             }
+            /*
+             else if(actionstatus === -1)
+             {
+             jsQObject.testlog("before forfunc");
+             jsQObject.forfunc(this.object);
+             jsQObject.retry();
+             return;
+             }
+             */
         }
+
+        jsQObject.testlog("action_index:" + this.object.action_index.toString());
 
         var cur_index = this.object.action_index;
         this.object.action_index++;
         jsQObject.forfunc(this.object);
 
         var parms2 = this.object.actions[cur_index];
-        
+
         var a = do_factory(parms2.func, parms2.parms);
+        //alert(parms2.func);
+
         a.action();
     };
 }
@@ -279,7 +316,7 @@ function scroll(object)
         }
 
         var parms = {"left": sx + offset_left, "top": sy + offset_top};
-        
+
         jsQObject.scroll(parms);
     };
 }
@@ -289,10 +326,10 @@ function randomscroll(object)
     this.object = object;
     this.action = function()
     {
-        var randomoption = jsQObject.randomoption();      
+        var option = jsQObject.randomoption();
 
-        var parms = {"top": randomoption.top - 100, "left": randomoption.left - 100};
-        
+        var parms = {"top": option.top - 100, "left": option.left - 100};
+
         jsQObject.scroll(parms);
     };
 }
@@ -302,10 +339,10 @@ function randommove(object)
     this.object = object;
     this.action = function()
     {
-        var randomoption = jsQObject.randomoption();
+        var option = jsQObject.randomoption();
         return;
 
-        var parms = {"top": randomoption.top + 10, "left": randomoption.left + 10};
+        var parms = {"top": option.top + 10, "left": option.left + 10};
 
         jsQObject.move(parms);
     };
@@ -316,10 +353,10 @@ function randommbclick(object)
     this.object = object;
     this.action = function()
     {
-        var randomoption = jsQObject.randomoption();
+        var option = jsQObject.randomoption();
 
-        var parms = {"top": randomoption.top + 10, "left": randomoption.left + 10};
-        
+        var parms = {"top": option.top + 10, "left": option.left + 10};
+
         jsQObject.mbclick(parms);
     };
 }
@@ -459,6 +496,7 @@ function factory(action, option)
 
 function factory_action(object) {
     //dump_obj(object);
+    jsQObject.testlog("factory_action");
     var step = object.signalsEmited;
     var option = object.option;
 
@@ -474,7 +512,21 @@ function factory_action(object) {
 
 function init()
 {
-    jsQObject.Sendtojs.connect(factory_action);
+    jsQObject.testlog("init");
+
+    /*
+     try {
+     jsQObject.Sendtojs.disconnect(factory_action);
+     }catch (e) {
+     jsQObject.testlog(e);
+     }
+     //*/
+
+    try {
+        jsQObject.Sendtojs.connect(factory_action);
+    } catch (e) {
+        jsQObject.testlog(e);
+    }
 }
 
 function start()

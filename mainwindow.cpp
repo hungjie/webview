@@ -45,6 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(timer_, SIGNAL(timeout()), this, SLOT(checkWebFinished()));
 
+    QFile file;
+    file.setFileName(":/bin/script.js");
+    file.open(QIODevice::ReadOnly);
+    js_script_ = file.readAll();
+    file.close();
+
     timer_->start(500);
 }
 

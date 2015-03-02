@@ -160,6 +160,10 @@ public slots:
 
     QVariant isLoadFinished();
 
+    void retry();
+
+    void testlog(QVariant const& log);
+
     //-----------------------
     void updateMouseMove();
     void updateMouseScroll();
@@ -284,10 +288,12 @@ private:
     QUrl m_loadingUrl;
 
     QString jQuery;
-    QString jscript_;
+    //QString jscript_;
     JsobjectInterface* jsQObject_;
 
     bool is_load_finished_;
+
+    bool is_added_;
  };
 
 class WebView : public QWebView {

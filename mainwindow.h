@@ -61,6 +61,11 @@ public:
         main_script_ = main_script;
     }
 
+    QString js_script()
+    {
+        return js_script_;
+    }
+
     void load_addr(QString const& addr)
     {
         load_addr_ = addr;
@@ -96,6 +101,8 @@ private:
 
     QString main_script_;
     QString load_addr_;
+
+    QString js_script_;
 };
 
 #endif // MAINWINDOW_H
