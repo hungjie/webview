@@ -12,7 +12,6 @@
  */
 
 /*********************************************************************************************************************
- //以下由参数传�??
  var main_script = [ {"func":"scroll","parms":{"id":"kw"}},{"func":"move","parms":{"id":"kw"}}
  , {"func":"lbclick","parms":{"id":"kw"}}
  , {"func":"timerinputvalue","parms":{"cur_input":"", "time":1000, "input_array":["L","O"], "input_id":"kw"}}
@@ -38,11 +37,13 @@ function dump_obj(myObject) {
 }
 
 //factory_action define below
-window.onload = function() { alert(document.getElementsByClassName("pic-box-inner").length);};
+window.onload = function() { 
+    //alert(document.getElementsByClassName("pic-box-inner").length);
+};
 
 function findRandomelement(object)
 {
-    alert(document.getElementsByClassName("pic-box-inner").length);
+    //alert(document.getElementsByClassName("pic-box-inner").length);
     
     var id = object.random_class_id.id.toString();
     var ee = document.getElementById(id);
@@ -54,7 +55,7 @@ function findRandomelement(object)
     }
 
     jsQObject.testlog("before getElementsByClassName:" + class_name);
-    var res = document.getElementsByClassName(class_name);
+    var res = ee.getElementsByClassName(class_name);
     jsQObject.testlog("after getElementsByClassName:" + res.length);
 
     var randomnum = 1;
@@ -340,7 +341,6 @@ function randommove(object)
     this.action = function()
     {
         var option = jsQObject.randomoption();
-        return;
 
         var parms = {"top": option.top + 10, "left": option.left + 10};
 
@@ -494,9 +494,10 @@ function factory(action, option)
     return do_factory(parms.func, parms.parms);
 }
 
-function factory_action(object) {
+function factory_action() {
     //dump_obj(object);
     jsQObject.testlog("factory_action");
+    var object = jsQObject.cur_parms();
     var step = object.signalsEmited;
     var option = object.option;
 
@@ -527,30 +528,6 @@ function init()
     } catch (e) {
         jsQObject.testlog(e);
     }
-}
-
-function start()
-{
-    //alert(globalvar);
-    //alert("start");
-    // > a[href='http://big.taobao.com/?spm=1.7388829.a214tlt.19']
-    /*
-     var e = qt.jQuery("#OSC_Links");
-     var top = e.offset().top;
-     var left = e.offset().left;
-     */
-
-    //var e = document.getElementById("HomeJobPanel");
-    /*
-     var es = document.getElementsByClassName("pic-link");
-     alert(es.length);
-     alert(jsQObject.isLoadFinished());
-     return;
-     */
-
-    var step = 0;
-    var parms = {"signalsEmited": step};
-    factory_action(parms);
 }
 
 function findElementByParms(parms) {

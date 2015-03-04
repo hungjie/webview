@@ -158,6 +158,8 @@ public slots:
     void randomoption(const QMap<QString, QVariant>& object);
     QMap<QString, QVariant> randomoption();
 
+    QMap<QString, QVariant> cur_parms();
+
     QVariant isLoadFinished();
 
     void retry();
@@ -171,6 +173,7 @@ public slots:
     void updateSleep();
     void updateLoadFinish();
     void whileMBRoll();
+    void emitTimer();
 
 protected:
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
@@ -196,6 +199,8 @@ private:
     QTimer* waitLoadFinishTimer_;
 
     QTimer* whilembroll_;
+
+    QTimer* emitTimer_;
 
     int move_x_;
     int move_y_;
@@ -246,6 +251,8 @@ public:
     void scrollBar(int left, int right);
 
     void excuteJS(QString const& func);
+    void excuteJS();
+
     QPoint scrollBar();
 
     int maxVerticalScrollBar();
@@ -322,7 +329,7 @@ protected:
 
 private slots:
     void setProgress(int progress);
-    void loadFinished();
+    void loadFinished(bool ok);
     void setStatusBarText(const QString &string);
     void downloadRequested(const QNetworkRequest &request);
     void openLinkInNewTab();

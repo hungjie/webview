@@ -81,6 +81,11 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
 
     whilembroll_ = new QTimer(this);
     connect(whilembroll_, SIGNAL(timeout()), this, SLOT(whileMBRoll()));
+
+    emitTimer_ = new QTimer(this);
+    connect(emitTimer_, SIGNAL(timeout()), this, SLOT(emitTimer()));
+
+    m_emitSignal["signalsEmited"] = 0;
 }
 
 JsobjectInterface::~JsobjectInterface()
@@ -93,6 +98,8 @@ JsobjectInterface::~JsobjectInterface()
 
     delete waitLoadFinishTimer_;
     delete whilembroll_;
+
+    delete emitTimer_;
 }
 
 /*
@@ -218,6 +225,11 @@ QMap<QString, QVariant> JsobjectInterface::randomoption()
 {
     qDebug() <<"randomoption:"<< m_randomOption.size();
     return m_randomOption;
+}
+
+QMap<QString, QVariant> JsobjectInterface::cur_parms()
+{
+    return m_emitSignal;
 }
 
 void JsobjectInterface::randomoption(const QMap<QString, QVariant> &object)
@@ -536,7 +548,7 @@ void JsobjectInterface::updateLoadFinish()
         if(!v || !v->webPage()->isLoadFinished())
         {
             // todo error
-            qDebug() << "error";
+            qDebug() << "!v || load unfinished error";
             return;
         }
 
@@ -548,7 +560,7 @@ void JsobjectInterface::updateLoadFinish()
     {
         waitLoadFinishTimer_->stop();
         //todo error
-        qDebug() << "error";
+        qDebug() << "!v error";
         return;
     }
 
@@ -605,6 +617,18 @@ void JsobjectInterface::whileMBRoll()
     }
 }
 
+void JsobjectInterface::emitTimer()
+{
+    qDebug() << "start emitTimer";
+    emitTimer_->stop();
+
+    WebView *v = MainWindow::Instance()->tabWidget()->currentWebView();
+    if(v)
+        v->webPage()->mainFrame()->evaluateJavaScript("factory_action()");
+    else
+        qDebug() << "error null v";
+}
+
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
 {
     this->m_emitSignal.clear();
@@ -623,7 +647,9 @@ void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVar
     }
 
     qDebug() << "emit sender:" << sender;
-    emit Sendtojs(this->m_emitSignal);
+    //emit Sendtojs(this->m_emitSignal);
+
+    emitTimer_->start(500);
 }
 
 void JsobjectInterface::nativeToGlobal(int &x, int &y)
@@ -750,6 +776,8 @@ WebPage::WebPage(QObject *parent)
     file2.close();
     */
 
+    jsQObject_ = new JsobjectInterface(this);
+
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(loadFinished(bool)));
 
     connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
@@ -758,7 +786,7 @@ WebPage::WebPage(QObject *parent)
 
 WebPage::~WebPage()
 {
-    //delete jsQObject_;
+    delete jsQObject_;
 }
 
 void WebPage::lefeMouseClicked()
@@ -776,12 +804,15 @@ void WebPage::excuteJS(const QString &func)
     mainFrame()->evaluateJavaScript(func);
 }
 
+void WebPage::excuteJS()
+{
+    mainFrame()->evaluateJavaScript("factory_action()");
+}
+
 void WebPage::addJavaScriptObject()
 {
     //mainFrame()->evaluateJavaScript(jQuery);
     qDebug() << "addJavaScriptObject";
-
-    jsQObject_ = new JsobjectInterface(this);
 
     mainFrame()->addToJavaScriptWindowObject("jsQObject", jsQObject_);
 
@@ -789,7 +820,7 @@ void WebPage::addJavaScriptObject()
 
     mainFrame()->evaluateJavaScript(MainWindow::Instance()->js_script());
 
-    mainFrame()->evaluateJavaScript(QString("init()"));
+    //mainFrame()->evaluateJavaScript(QString("init()"));
 
     if(!is_added_)
     {
@@ -827,6 +858,8 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
         webView->load(request);
         m_keyboardModifiers = Qt::NoModifier;
         m_pressedButtons = Qt::NoButton;
+
+        is_load_finished_ = true;
 
         return false;
     }
@@ -888,7 +921,7 @@ WebView::WebView(QWidget* parent)
     connect(this, SIGNAL(loadStarted()),
             this, SLOT(loadStarted()));
     connect(this, SIGNAL(loadFinished(bool)),
-            this, SLOT(loadFinished()));
+            this, SLOT(loadFinished(bool)));
     connect(page(), SIGNAL(loadingUrl(QUrl)),
             this, SIGNAL(urlChanged(QUrl)));
     connect(page(), SIGNAL(downloadRequested(QNetworkRequest)),
@@ -982,7 +1015,7 @@ void WebView::loadStarted()
     //webPage()->myCookie()->clearCookies();
 }
 
-void WebView::loadFinished()
+void WebView::loadFinished(bool ok)
 {
     if (100 != m_progress) {
         qWarning() << "Received finished signal while progress is still:" << progress()
@@ -990,6 +1023,8 @@ void WebView::loadFinished()
     }
 
     m_progress = 0;
+
+    //webPage()->loadFinished(true);
 }
 
 void WebView::loadUrl(const QUrl &url)

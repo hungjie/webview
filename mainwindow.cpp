@@ -103,7 +103,8 @@ void MainWindow::checkWebFinished()
     if(wv && wv->webPage()->isLoadFinished())
     {
         timer_->stop();
-        wv->webPage()->excuteJS("start()");
+        //wv->webPage()->excuteJS("start()");
+        wv->webPage()->excuteJS();
     }
 
     if(timers_++ == 100)
