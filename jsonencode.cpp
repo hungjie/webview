@@ -26,6 +26,7 @@ QJsonObject generateObject(QString const& func)
             || func == "randomscroll"
             || func == "randommove"
             || func == "randommbclick"
+            || func == "randomscrollandmoveandmbclick"
             )
     {
         object.insert("func", func);
@@ -114,6 +115,8 @@ bool JsonEncode::parser(const QString &arg)
 
     QJsonArray QJsonArrayActions;
 
+    /*
+
     QJsonObject actionscroll01 = generateObject("randomscroll");
     QJsonObject actionparms01;
     actionscroll01.insert("parms", actionparms01);
@@ -131,6 +134,18 @@ bool JsonEncode::parser(const QString &arg)
     actionmbclick03.insert("parms", actionparms03);
 
     QJsonArrayActions.push_back(actionmbclick03);
+
+    */
+
+    QJsonObject actionrandomSMC = generateObject("randomscrollandmoveandmbclick");
+    QJsonObject actionrandomSMC_parms;
+    actionrandomSMC_parms.insert("id", "mainsrp-itemlist");
+    actionrandomSMC_parms.insert("class_name", "pic-box-inner");
+    actionrandomSMC_parms.insert("cur_time", 0);
+    actionrandomSMC_parms.insert("times", 2);
+    actionrandomSMC.insert("parms", actionrandomSMC_parms);
+
+    QJsonArrayActions.push_back(actionrandomSMC);
 
     QJsonObject actionscroll0 = generateObject("scroll");
     QJsonObject actionparms0;

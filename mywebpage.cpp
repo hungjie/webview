@@ -63,6 +63,8 @@ void MouseOperator::MBRoll(int ch)
 JsobjectInterface::JsobjectInterface(QObject *parent)
     : QObject(0)
     , page_(parent)
+    , scrollmovembclickstep_(0)
+    , need_emited_(true)
 {
     mouseMoveTimer_ = new QTimer(this);
     connect(mouseMoveTimer_, SIGNAL(timeout()), this, SLOT(updateMouseMove()));
@@ -85,6 +87,9 @@ JsobjectInterface::JsobjectInterface(QObject *parent)
     emitTimer_ = new QTimer(this);
     connect(emitTimer_, SIGNAL(timeout()), this, SLOT(emitTimer()));
 
+    randomScrollAndMoveAndMbclickTimer_ = new QTimer(this);
+    connect(randomScrollAndMoveAndMbclickTimer_, SIGNAL(timeout()), this, SLOT(randomScrollAndMoveAndMbclickTimer()));
+
     m_emitSignal["signalsEmited"] = 0;
 }
 
@@ -100,6 +105,8 @@ JsobjectInterface::~JsobjectInterface()
     delete whilembroll_;
 
     delete emitTimer_;
+
+    delete randomScrollAndMoveAndMbclickTimer_;
 }
 
 /*
@@ -345,7 +352,10 @@ void JsobjectInterface::mbclick(const QMap<QString, QVariant> &object)
     //emitSignal["top"] = QVariant(y);
     //emitSignal["left"] = QVariant(x);
 
-    emitToJs("mbclick", emitSignal);
+    if(need_emited_)
+        emitToJs("mbclick", emitSignal);
+
+    need_emited_ = true;
 }
 
 void JsobjectInterface::mbroll(const QMap<QString, QVariant> &object)
@@ -378,6 +388,109 @@ QVariant JsobjectInterface::isLoadFinished()
 {
     bool res = qobject_cast<WebPage*>(page_)->isLoadFinished();
     return QVariant::fromValue(res);
+}
+
+void JsobjectInterface::randomscrollandmoveandmbclick(const QMap<QString, QVariant> &object)
+{
+    qDebug() << "test in randomscrollandmoveandmbclick";
+    m_emitSignal = object;
+
+    randomScrollAndMoveAndMbclickTimer_->start(50);
+}
+
+void JsobjectInterface::randomScrollAndMoveAndMbclickTimer()
+{
+    int cur_time = m_emitSignal["cur_time"].toInt();
+    int times = m_emitSignal["times"].toInt();
+
+    if(cur_time >= times)
+    {
+        scrollmovembclickstep_ = 0;
+        randomScrollAndMoveAndMbclickTimer_->stop();
+        emitToJs("randomScrollAndMoveAndMbclickTimer", m_emitSignal);
+        return;
+    }
+
+    if(scrollmovembclickstep_ == 0)
+    {
+        QString id = m_emitSignal["id"].toString();
+        QString class_name = m_emitSignal["class_name"].toString();
+
+        QString func = QString("random_id_class(\"%1\",\"%2\")").arg(id).arg(class_name);
+
+        qDebug() << "smm get func:" << func;
+
+        QVariant pos = emit_func(func);
+
+        if(pos.isNull())
+        {
+            qDebug() << "null return";
+            scrollmovembclickstep_ = 0;
+            randomScrollAndMoveAndMbclickTimer_->stop();
+            emitToJs("randomScrollAndMoveAndMbclickTimer", m_emitSignal);
+            return;
+        }
+
+        scrollmovembclickmap_ = pos.toMap();
+
+        m_emitSignal["cur_time"] = cur_time + 1;
+
+        scrollmovembclickstep_++;
+
+        qDebug() << "scrollmovembclickstep_:" << scrollmovembclickstep_<< ",cur_time:" << cur_time;
+    }
+
+    if(scrollmovembclickstep_ == 1)
+    {
+        int top = scrollmovembclickmap_["top"].toInt() - 100;
+        int left = scrollmovembclickmap_["left"].toInt() - 100;
+
+        scroll_x_ = left;
+        scroll_y_ = top;
+
+        disemited();
+        updateMouseScroll();
+
+        if(need_emited())
+        {
+            scrollmovembclickstep_++;
+        }
+
+        return;
+    }
+
+    if(scrollmovembclickstep_ == 2)
+    {
+        int top = scrollmovembclickmap_["top"].toInt() + 10;
+        int left = scrollmovembclickmap_["left"].toInt() + 10;
+
+        move_x_ = left;
+        move_y_ = top;
+
+        nativeToGlobal(move_x_, move_y_);
+
+        disemited();
+        updateMouseMove();
+
+        if(need_emited())
+        {
+            scrollmovembclickstep_++;
+        }
+
+        return;
+    }
+
+    if(scrollmovembclickstep_ == 3)
+    {
+        QMap<QString, QVariant> op;
+        op["left"] = -1;
+        op["top"] = -1;
+
+        disemited();
+        mbclick(op);
+
+        scrollmovembclickstep_ = 0;
+    }
 }
 
 void JsobjectInterface::retry()
@@ -418,13 +531,17 @@ void JsobjectInterface::updateMouseMove()
 
     if(x == move_x_ && y == move_y_)
     {
-        mouseMoveTimer_->stop();
-
         QMap<QString, QVariant> emitSignal;
 //        emitSignal["top"] = QVariant(move_y_);
 //        emitSignal["left"] = QVariant(move_x_);
         qDebug() << "emit mouse move fini";
-        emitToJs("updateMouseMove", emitSignal);
+        if(need_emited_)
+        {
+            mouseMoveTimer_->stop();
+            emitToJs("updateMouseMove", emitSignal);
+        }
+
+        need_emited_ = true;
     }
 }
 
@@ -478,8 +595,6 @@ void JsobjectInterface::updateMouseScroll()
         }
         else
         {
-            mouseScrollTimer_->stop();
-
             QMap<QString, QVariant> emitSignal;
 //            emitSignal["scroll_y"] = QVariant(scroll_y_);
 //            emitSignal["scroll_x"] = QVariant(scroll_x_);
@@ -489,7 +604,13 @@ void JsobjectInterface::updateMouseScroll()
 
             emitSignal["add"] = QVariant::fromValue(list);
 */
-            emitToJs("updateMouseScroll", emitSignal);
+            if(need_emited_)
+            {
+                mouseScrollTimer_->stop();
+                emitToJs("updateMouseScroll", emitSignal);
+            }
+
+            need_emited_ = true;
             return;
         }
     }
@@ -617,16 +738,24 @@ void JsobjectInterface::whileMBRoll()
     }
 }
 
+QVariant JsobjectInterface::emit_func(QString const& func)
+{
+    QVariant res;
+    WebView *v = MainWindow::Instance()->tabWidget()->currentWebView();
+    if(v)
+        res = v->webPage()->mainFrame()->evaluateJavaScript(func);
+    else
+        qDebug() << "error null v";
+
+    return res;
+}
+
 void JsobjectInterface::emitTimer()
 {
     qDebug() << "start emitTimer";
     emitTimer_->stop();
 
-    WebView *v = MainWindow::Instance()->tabWidget()->currentWebView();
-    if(v)
-        v->webPage()->mainFrame()->evaluateJavaScript("factory_action()");
-    else
-        qDebug() << "error null v";
+    emit_func("factory_action()");
 }
 
 void JsobjectInterface::emitToJs(QString const& sender, const QMap<QString, QVariant> &object)
@@ -662,6 +791,11 @@ void JsobjectInterface::nativeToGlobal(int &x, int &y)
     QPoint vp = MainWindow::Instance()->viewPos();
     x += vp.x();
     y += vp.y();
+}
+
+void JsobjectInterface::disemited()
+{
+    need_emited_ = false;
 }
 
 MyCookieJar::MyCookieJar(QObject *parent)

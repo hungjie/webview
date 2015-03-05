@@ -162,6 +162,9 @@ public slots:
 
     QVariant isLoadFinished();
 
+    void randomscrollandmoveandmbclick(const QMap<QString, QVariant>& object);
+    void randomScrollAndMoveAndMbclickTimer();
+
     void retry();
 
     void testlog(QVariant const& log);
@@ -176,9 +179,13 @@ public slots:
     void emitTimer();
 
 protected:
+    QVariant emit_func(QString const& func);
     void emitToJs(QString const& sender, QMap<QString, QVariant> const& object);
 
     void nativeToGlobal(int& x, int& y);
+
+    void disemited();
+    bool need_emited(){return need_emited_;}
 
 private:
     static int m_signalEmited;
@@ -202,6 +209,8 @@ private:
 
     QTimer* emitTimer_;
 
+    QTimer* randomScrollAndMoveAndMbclickTimer_;
+
     int move_x_;
     int move_y_;
 
@@ -212,6 +221,11 @@ private:
     int mbroll_times_;
 
     static bool emit_increasement_;
+
+    int scrollmovembclickstep_;
+    QMap<QString, QVariant> scrollmovembclickmap_;
+
+    bool need_emited_;
 };
 
 class MyCookieJar : public QNetworkCookieJar

@@ -41,6 +41,32 @@ window.onload = function() {
     //alert(document.getElementsByClassName("pic-box-inner").length);
 };
 
+function random_id_class(id, class_name)
+{  
+    var ee = document.getElementById(id);
+    
+    var res = ee.getElementsByClassName(class_name);
+    
+    var randomnum = 1;
+
+    if (res.length > 1)
+    {
+        randomnum = res.length;
+    }
+
+    var index = parseInt((randomnum - 1) * Math.random());
+
+    var index_res = res[index];
+
+    var sy = getElementTop(index_res);
+    
+    var sx = getElementLeft(index_res);
+
+    var parms = {"top": sy, "left": sx};
+    
+    return parms;
+}
+
 function findRandomelement(object)
 {
     //alert(document.getElementsByClassName("pic-box-inner").length);
@@ -54,9 +80,7 @@ function findRandomelement(object)
         jsQObject.testlog("ee error");
     }
 
-    jsQObject.testlog("before getElementsByClassName:" + class_name);
     var res = ee.getElementsByClassName(class_name);
-    jsQObject.testlog("after getElementsByClassName:" + res.length);
 
     var randomnum = 1;
 
@@ -86,7 +110,7 @@ function foundelementid(object) {
 
         if (e === undefined || e === null)
         {
-            findRandomelement(this.object);
+            //findRandomelement(this.object);
             
             jsQObject.testlog("eundefined");
 
@@ -322,6 +346,22 @@ function scroll(object)
     };
 }
 
+function randomscrollandmoveandmbclick(object)
+{
+    this.object = object;
+    
+    this.action = function()
+    {
+        var cur_time = this.object.cur_time;
+        var times = this.object.times;
+        var id = this.object.id;
+        var class_name = this.object.class_name;
+        
+        var parms = {"cur_time":cur_time, "times":times, "id":id, "class_name":class_name};
+        jsQObject.randomscrollandmoveandmbclick(parms);
+    };
+}
+
 function randomscroll(object)
 {
     this.object = object;
@@ -470,6 +510,10 @@ function do_factory(func, parms)
     else if (func === "randommbclick")
     {
         o = new randommbclick(parms);
+    }
+    else if(func === "randomscrollandmoveandmbclick")
+    {
+        o = new randomscrollandmoveandmbclick(parms);
     }
 
     //dump_obj(o);
